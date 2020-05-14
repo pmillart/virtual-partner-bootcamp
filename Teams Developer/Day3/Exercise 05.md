@@ -14,7 +14,7 @@ https://developer.microsoft.com/en-us/graph/graph-explorer
 
 ![](images/user-profile.png)
 
-Choose on of the users you setup with a profile and copy the id value (without the quotes. Open a new tab to Graph Explorer and run the following query to validate you can get the users profile information. Replace the {id} with the value you previously copied. Then click Run Query.
+Choose one of the users you setup with a profile and copy the id value (without the quotes. Open a new tab to Graph Explorer and run the following query to validate you can get the users profile information. Replace the {id} with the value you previously copied. Then click Run Query.
 You should see one user with their respective responsibilities & skills listed.  
 [https://graph.microsoft.com/v1.0/users/{id}?$select=userPrincipalName,displayName,skills,responsibilities](https://graph.microsoft.com/v1.0/users/{id}?$select=userPrincipalName,displayName,skills,responsibilities)  
 
