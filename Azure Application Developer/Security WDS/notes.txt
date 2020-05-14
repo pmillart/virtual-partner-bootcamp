@@ -1,0 +1,10 @@
+Topics will include authentication, authorization, encryption as well as at the network level to help protect your services.
+
+ 
+
+I think the scenario you should cover is building new cloud native application and working through the security at each step. So pull up a scenario where you could use managed identities, service principals, Azure AD authentication, key vault etc.. If you can think of a partner twist to it too all the better.
+
+
+my apps . microsoft.com  IDP initiated sign ons....
+
+easy auth - 

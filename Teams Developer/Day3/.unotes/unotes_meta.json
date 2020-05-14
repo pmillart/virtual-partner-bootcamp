@@ -1,0 +1,24 @@
+{
+  "name": "",
+  "isOrdered": true,
+  "folders": {
+    "images": {
+      "name": "images",
+      "isOrdered": true,
+      "folders": {},
+      "files": {}
+    }
+  },
+  "files": {
+    "StudentGuide": 0,
+    "TrainerGuide Challenge 1": 1,
+    "Exercise 01": 2,
+    "Exercise 02": 3,
+    "Exercise 03": 4,
+    "Exercise 04": 5,
+    "Exercise 05": 6,
+    "Exercise 06": 7,
+    "Exercise 07": 8,
+    "StudentGuide copy": 9
+  }
+}
