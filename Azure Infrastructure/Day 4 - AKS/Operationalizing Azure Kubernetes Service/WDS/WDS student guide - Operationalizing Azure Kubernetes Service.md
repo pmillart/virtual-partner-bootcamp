@@ -177,7 +177,7 @@ Directions: With all participants at your table, respond to the following questi
 
 **Application onboarding**
 
-1. What types of compute would you recommend for applications with high IOPS requirements? If a future application or workload requires another type of compute how would you incorporate it into Contoso Commerce's cluster(s)? How would you implement your solution in AKS?
+1. What types of compute would you recommend for applications with high IOPS requirements? If a future application or workload requires another type of compute how would you incorporate it into Contoso Commerce's cluster(s) and that the compute can only be utilized by the workload is was created to host? How would you implement your solution in AKS?
 2. What IP addressing scheme would you recommend to Contoso Commerce to best balance resource usage for nodes and pods?
    1. How did you accommodate future growth and cluster upgrades in your IP address scheme?
 3. What considerations are there for network security with pods being exposed directly to the virtual network?

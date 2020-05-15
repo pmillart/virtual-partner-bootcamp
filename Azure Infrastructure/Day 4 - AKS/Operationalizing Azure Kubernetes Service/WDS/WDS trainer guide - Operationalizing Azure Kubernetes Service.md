@@ -278,7 +278,7 @@ Directions: With all participants at your table, respond to the following questi
 
 **Application onboarding**
 
-1. What types of compute would you recommend for applications with high IOPS requirements? If a future application or workload requires another type of compute how would you incorporate it into Contoso Commerce's cluster(s)?  How would you implement your solution in AKS?
+1. What types of compute would you recommend for applications with high IOPS requirements? If a future application or workload requires another type of compute how would you incorporate it into Contoso Commerce's cluster(s) and that the compute can only be utilized by the workload is was created to host?  How would you implement your solution in AKS?
 2. What IP addressing scheme would you recommend to Contoso Commerce to best balance resource usage for nodes and pods?
    1. How did you accommodate future growth and cluster upgrades in your IP address scheme?
 3. What considerations are there for network security with pods being exposed directly to the virtual network?
@@ -422,7 +422,7 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
 
 **Application onboarding**
 
-1. **Design:** What types of compute would you recommend for applications with high IOPS requirements? If a future application or workload requires another type of compute how would you incorporate it into Contoso Commerce's cluster(s)? How would you implement your solution in AKS?
+1. **Design:** What types of compute would you recommend for applications with high IOPS requirements? If a future application or workload requires another type of compute how would you incorporate it into Contoso Commerce's cluster(s) and that the compute can only be utilized by the workload is was created to host? How would you implement your solution in AKS?
 
     **Solution:** IOPS requirements can be solved for in several ways in Azure, including the application of premium disks, striping slower disks, or even selecting a VM series that is designed for high IO. All of these options have various trade-offs, such as operational overhead, cost, and more.
 
@@ -432,7 +432,26 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
     - The [Sizes for Linux virtual machines in Azure](https://docs.microsoft.com/azure/virtual-machines/linux/sizes) offers a number of options, with the [storage optimized](https://docs.microsoft.com/azure/virtual-machines/sizes-storage) *[Lsv2-series](https://docs.microsoft.com//azure/virtual-machines/lsv2-series)* being a natural candidate as it is tuned for high disk throughput and transactional workloads such as data analytics.
     - Another decision point for selecting a VM SKU and size is availability of the SKU in a given region. In this case, we would want to ensure that both AKS *and* the selected VM SKU are *both* available in the region(s) we want to operate in.
 
-    Once we have selected our size and series, we can create a new node pool in the cluster.
+    Once we have selected our size and series, we can create a new node pool in the cluster (see [Limitations](https://docs.microsoft.com/azure/aks/use-multiple-node-pools#limitations) for multiple node pool clusters for other considerations).
+
+    ```sh
+    az aks nodepool add \
+      --resource-group constosAKSrg \
+      --cluster-name constosoAKScluster \
+      --name iopspool \
+      --node-count 3 \
+      --kubernetes-version 1.15.7
+      --node-vm-size Standard_L8s_v2 \
+    ```
+
+    **Note:** For further isolation at the network layer, additional node pools can be split into their own subnet using the `--vnet-subnet-id <YOUR_SUBNET_RESOURCE_ID>` argument on the `az aks nodepool create` command.
+
+    **Note:** If the `--node-vm-size` argument is not supplied at the time the node pool is created, the node members will be created in a default size (`Standard_DS2_v2` for Linux node pools and `Standard_DS2_v3` for Windows node pools).
+
+    To restrict the new compute to just the desired workload(s), taints will need to be applied to nodes and then tolerations applied to pods (see [Taints and Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)).
+
+    - A taint is applied to a node that indicates only specific pods can be scheduled on them.
+    - A toleration is then applied to a pod that allows them to tolerate a node's taint.
 
 2. **Design:** What IP addressing scheme would you recommend to Contoso Commerce to best balance resource usage for nodes and pods?
 
