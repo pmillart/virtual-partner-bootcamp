@@ -278,7 +278,7 @@ Directions: With all participants at your table, respond to the following questi
 
 **Application onboarding**
 
-1. What types of compute would you recommend for applications with high IOPS requirements? If a future application or workload requires another type of compute how would you incorporate it into Contoso Commerce's cluster(s)?
+1. What types of compute would you recommend for applications with high IOPS requirements? If a future application or workload requires another type of compute how would you incorporate it into Contoso Commerce's cluster(s)?  How would you implement your solution in AKS?
 2. What IP addressing scheme would you recommend to Contoso Commerce to best balance resource usage for nodes and pods?
    1. How did you accommodate future growth and cluster upgrades in your IP address scheme?
 3. What considerations are there for network security with pods being exposed directly to the virtual network?
@@ -422,9 +422,17 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
 
 **Application onboarding**
 
-1. **Design:** What types of compute would you recommend for applications with high IOPS requirements? If a future application or workload requires another type of compute how would you incorporate it into Contoso Commerce's cluster(s)?
+1. **Design:** What types of compute would you recommend for applications with high IOPS requirements? If a future application or workload requires another type of compute how would you incorporate it into Contoso Commerce's cluster(s)? How would you implement your solution in AKS?
 
-    **Solution:**
+    **Solution:** IOPS requirements can be solved for in several ways in Azure, including the application of premium disks, striping slower disks, or even selecting a VM series that is designed for high IO. All of these options have various trade-offs, such as operational overhead, cost, and more.
+
+    In this case, we know that the existing application is performed as desired within a default AKS configuration. For the new application, we can create a new node pool which is tuned specifically to that application. Before we can create a new node pool, we must select a VM series and size that we will use for our node pool members:
+
+    - There are several [VM SKUs which should be avoided in AKS](https://docs.microsoft.com/azure/aks/quotas-skus-regions#restricted-vm-sizes) that can immediately be ruled out.
+    - The [Sizes for Linux virtual machines in Azure](https://docs.microsoft.com/azure/virtual-machines/linux/sizes) offers a number of options, with the [storage optimized](https://docs.microsoft.com/azure/virtual-machines/sizes-storage) *[Lsv2-series](https://docs.microsoft.com//azure/virtual-machines/lsv2-series)* being a natural candidate as it is tuned for high disk throughput and transactional workloads such as data analytics.
+    - Another decision point for selecting a VM SKU and size is availability of the SKU in a given region. In this case, we would want to ensure that both AKS *and* the selected VM SKU are *both* available in the region(s) we want to operate in.
+
+    Once we have selected our size and series, we can create a new node pool in the cluster.
 
 2. **Design:** What IP addressing scheme would you recommend to Contoso Commerce to best balance resource usage for nodes and pods?
 
