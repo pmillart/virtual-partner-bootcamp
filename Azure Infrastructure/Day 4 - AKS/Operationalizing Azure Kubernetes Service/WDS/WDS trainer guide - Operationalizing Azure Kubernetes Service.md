@@ -297,7 +297,7 @@ Directions: With all participants at your table, respond to the following questi
 **Operations and monitoring**
 
 1. How will you collect and monitor cluster, node, and pod health and performance? Where will the logs be stored and how will they be accessed?
-2. What will you use to visual logs for each application team?
+2. What will you use to visualize logs for each application team?
 3. How will you ensure that access to logs is read-only?
 
 **Scaling**
@@ -586,35 +586,63 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
 
     > *PREVIEWS ARE PROVIDED "AS-IS," "WITH ALL FAULTS," AND "AS AVAILABLE," AND ARE EXCLUDED FROM THE SERVICE LEVEL AGREEMENTS AND LIMITED WARRANTY. Previews may not be covered by customer support. Previews may be subject to reduced or different security, compliance and privacy commitments, as further explained in the [Microsoft Online Services Privacy Statement](https://go.microsoft.com/fwlink/?LinkId=131004&clcid=0x409), [Microsoft Azure Trust Center](https://azure.microsoft.com/overview/trusted-cloud/), the [Online Services Terms](https://www.microsoftvolumelicensing.com/DocumentSearch.aspx?Mode=3&DocumentTypeId=31), and any additional notices provided with the Preview. Customers should not use Previews to process Personal Data or other data that is subject to heightened compliance requirements... We may change or discontinue Previews at any time without notice. We also may choose not to release a Preview into "General Availability."*
 
+    At this time, with Ubuntu 18.04 only available in a preview state, you may consider informing the customer of any limitations or constraints that will be present in your SLA for operations due to the use of a preview feature.
+
     Also consider that in a default configuration, AKS does not come with an SLA which is a risk for any implementation, perhaps even more so for a service provider who is providing services around the management of AKS for customers.
-    
-    As of March 2020, an [Azure Kubernetes Service (AKS) Uptime SLA](https://azure.microsoft.com/support/legal/sla/kubernetes-service/v1_1/) is available, 
+
+    As of March 2020, an [Azure Kubernetes Service (AKS) Uptime SLA](https://azure.microsoft.com/support/legal/sla/kubernetes-service/v1_1/) is available for purchase. This is a financially backed SLA and provides for availability of 99.95% for the Kubernetes API Server for AKS clusters that use Azure Availability Zones and 99.9% for AKS clusters that do not use Azure Availability Zones.
+
+    It is important to recognize the distinction between AKS service availability which refers to uptime of the Kubernetes control plane and the availability of a specific workload which is running on Azure VMs. Although the control plane may be unavailable if the control plane is not ready, your cluster workloads running on Azure VMs can still function.
 
 2. **Design:** Contoso Commerce will need a "go-forward" plan as new versions of Ubuntu become available. What approach would you recommend they take to perform rapid testing of new operating systems with support for Kubernetes and how would you implement your approach?
 
-    **Solution:**
+    **Solution:** As new versions of Ubuntu are released in a preview state, new clusters can be provisioned in Azure which target the new OS and testing can be performed against them.
+
+    It is also possible to test new operating systems before they are avaialble in the formal AKS service by leverage the underlying deployment and provisioning engine that Microsoft uses for AKS - [AKS Engine](https://github.com/Azure/aks-engine):
+
+    > *AKS Engine provides convenient tooling to quickly bootstrap Kubernetes clusters on Azure. By leveraging ARM (Azure Resource Manager), AKS Engine helps you create, destroy and maintain clusters provisioned with basic IaaS resources in Azure. AKS Engine is also the library used by AKS for performing these operations to provide managed service implementations.*
 
 **Migration**
 
 1. **Design:** How will you migrate existing applications from the current cluster to a new cluster for validation?
 
-    **Solution:**
+    **Solution:** There are number of circumstances which will require a new AKS cluster outside of even this migration from the customers current cluster to a new cluster with the features that they require which you manage.
+
+    In general, you can be better positioned to lessen the number of future migrations by adopting AKS features such as clusters backed by Virtual Machine Scale Sets (VMSS) and Azure Standard Load Balancer to ensure you get access to the latest features such as multiple node pools and [Azure Policy](https://docs.microsoft.com/azure/governance/policy/concepts/rego-for-aks).
+
+    In regard to specific migration, you know that deployments today are currently executed manually from a series of scripts that are stored in source control with each application. Deployments are mixed, with some teams using native Kubernetes deployments and others adopting Helm. With manual deployments already authored, you can use the existing deployment scripts to target the new environment and modify them as required.
 
 2. **Design:** How will you minimize downtime for currently running workloads?
 
-    **Solution:**
+    **Solution:** For many applications, especially complex applications that are critical to the success of the business, it may be necessary to migration application components over time. If the migration can not be executed within the window provided by the business, it will be necessary to stand up the new cluster and begin migrating individual services and deployments.
+
+    This will likely require the implementation of a [load-balancing service](https://docs.microsoft.com/azure/aks/aks-migration#high-availability-and-business-continuity) that is external to the cluster such as Azure Application Gateway, Azure Traffic Manager, or Azure Front Door Service.
+
+    Ultimately, you will need to undertake an assessment of the time it takes to deploy the workloads required and perform any data migrations to further refine your approach.
 
 3. **Design:** What would you recommend to automate the execution of deployments based on the approach Contoso Commerce has used to-date?
 
-    **Solution:**
+    **Solution:** It would be appropriate to suggest that Contoso Commerce consider implementing Continuous Integration/Continuous Deployment (CI/CD) using Azure Pipelines (see [Build and deploy to Azure Kubernetes Service](https://docs.microsoft.com/azure/devops/pipelines/ecosystems/kubernetes/aks-template?view=azure-devops)) or GitHub Actions (see [Deploy to Kubernetes cluster](https://github.com/marketplace/actions/deploy-to-kubernetes-cluster)). Any investments in deployment automation now will greatly increase the speed at which new clusters can be deployed in the future - and new clusters will need to be deployed in the future as new features become available that can not be enabled on the existing cluster.
 
 **Operations and monitoring**
 
 1. **Design:** How will you collect and monitor cluster, node, and pod health and performance? Where will the logs be stored and how will they be accessed?
 
-    **Solution:**
+    **Solution:** Telemetry from the cluster, cluster nodes, and pods will be consolidated within a Log Analytics workspace. This will require the implementation of [Azure Monitor for containers](https://docs.microsoft.com/azure/azure-monitor/insights/container-insights-overview).
 
-2. **Design:** What will you use to visual logs for each application team?
+    Azure Monitor for containers gives you performance visibility by collecting memory and processor metrics from controllers, nodes, and containers that are available in Kubernetes through the Metrics API. Container logs are also collected. After you enable monitoring from Kubernetes clusters, metrics and logs are automatically collected for you through a containerized version of the Log Analytics agent for Linux. Metrics are written to the metrics store and log data is written to the logs store associated with your Log Analytics workspace.
+
+    To [enable Azure Monitor for containers](https://docs.microsoft.com/azure/azure-monitor/insights/container-insights-onboard) you will need a [Log Analytics workspace](https://docs.microsoft.com/azure/azure-monitor/log-query/log-query-overview) and you must be an [Owner](https://docs.microsoft.com/azure/role-based-access-control/built-in-roles#owner) of the AKS cluster resource.
+
+    The solution requires the deployment of a containerized Log Analytics agent developed specifically for Azure Monitor for containers. The specialized agent collects performance and event data from all nodes in the cluster, and the agent is automatically deployed and registered with the specified Log Analytics workspace during deployment. The agent version is `microsoft/oms:ciprod04202018` or later, and is represented by a date in the format `mmddyyyy`.
+
+    Monitoring can be enabled on existing clusters or at the time a new cluster is created.
+
+    Once monitoring is enabled and the agent deployed, you can begin to [monitor the performance of the AKS cluster](https://docs.microsoft.com/azure/azure-monitor/insights/container-insights-analyze) in Azure Monitor for containers or performance can be [viewed directly from a cluster](https://docs.microsoft.com/azure/azure-monitor/insights/container-insights-analyze#view-performance-directly-from-a-cluster).
+
+    With Azure Monitor for containers the operational data is stored in Log Analytics. This means that you will need to not only need to provision a workspace, but also configure that workspace for any other solutions you desire. You may also need to configure retention for the workspace. Many configuration changes you make to a workspace will affect the cost of the underlying workspace (see [Estimating the costs to manage your environment](https://docs.microsoft.com/azure/azure-monitor/platform/manage-cost-storage#estimating-the-costs-to-manage-your-environment)).
+
+2. **Design:** What will you use to visualize logs for each application team?
 
     **Solution:**
 

@@ -196,7 +196,7 @@ Directions: With all participants at your table, respond to the following questi
 **Operations and monitoring**
 
 1. How will you collect and monitor cluster, node, and pod health and performance? Where will the logs be stored and how will they be accessed?
-2. What will you use to visual logs for each application team?
+2. What will you use to visualize logs for each application team?
 3. How will you ensure that access to logs is read-only?
 
 **Scaling**
