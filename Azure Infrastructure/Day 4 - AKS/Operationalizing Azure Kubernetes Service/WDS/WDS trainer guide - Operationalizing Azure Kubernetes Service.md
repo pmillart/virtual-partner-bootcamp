@@ -644,11 +644,38 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
 
 2. **Design:** What will you use to visualize logs for each application team?
 
-    **Solution:**
+    **Solution:** While the primary visualization tool for operations will likely be Azure Monitor for containers, with multiple applications coming online each with different performance characteristics, per-application operational monitoring is a customer requirement and each development team needs access to a dashboard where they can view the performance of only their applications containers.
+
+    For application teams, [Workbooks](https://docs.microsoft.com/azure/azure-monitor/insights/container-insights-analyze#workbooks) can be created which combine log queries, metrics, and parameters into interactive reports.
+
+    Azure Monitor for containers includes four workbooks and custom workbooks can be created as well:
+
+    - **Disk capacity:** Presents interactive disk usage charts for each disk presented to the node within a container by the following perspectives:
+      - Disk percent usage for all disks.
+      - Free disk space for all disks.
+      - A grid that shows each node's disk, its percentage of used space, trend of percentage of used space, free disk space (GiB), and trend of free disk space (GiB).
+    - **Disk IO:** Presents interactive disk utilization charts for each disk presented to the node within a container by the following perspectives:
+      - Disk I/O summarized across all disks by read bytes/sec, writes bytes/sec, and read and write bytes/sec trends.
+      - Eight performance charts show key performance indicators to help measure and identify disk I/O bottlenecks.
+    - **Kubelet:** Includes two grids that show key node operating statistics:
+      - Overview by node grid summarizes total operation, total errors, and successful operations by percent and trend for each node.
+      - Overview by operation type summarizes for each operation the total operation, total errors, and successful operations by percent and trend.
+    - **Network:** Presents interactive network utilization charts for each node's network adapter, and a grid presents the key performance indicators to help measure the performance of your network adapters.
 
 3. **Design:** How will you ensure that access to logs is read-only?
 
-    **Solution:**
+    **Solution:** Contoso Commerce's existing operations team requires read-only access to a dashboard to understand performance across the cluster. To meet this need, log data will not only be retained to meet the needs of the customer, but Azure role-based access control will be used to set  permissions.
+
+    There are currently several ways to grant access to a workspace and the data within it:
+
+    - Workspace permissions (see [Manage access using workspace permissions](https://docs.microsoft.com/azure/azure-monitor/platform/manage-access#manage-access-using-workspace-permissions)).
+    - Azure role-based access control for accessing data from:
+      - Specific resources (see [Manage access using Azure permissions](https://docs.microsoft.com/azure/azure-monitor/platform/manage-access#manage-access-using-azure-permissions))
+      - Specific tables (see [Table level RBAC](https://docs.microsoft.com/azure/azure-monitor/platform/manage-access#table-level-rbac))
+
+    Members of the operations team can be assigned the *Log Analytics Reader* role on the AKS cluster resource and the Log Analytics workspace that contains their operational data. They can also be granted access to one or more workbooks to view the underlying dataset.
+
+    By default, the data in Log Analytics is read-only and is only purged when the retention period for the data has expired. It is possible to purge data from a workspace using the *purge* API path, however this is a privileged operation and requires a specialized role assignment - *Data Purger* (see [How to export and delete private data](https://docs.microsoft.com/azure/azure-monitor/platform/personal-data-mgmt#how-to-export-and-delete-private-data).
 
 **Scaling**
 
