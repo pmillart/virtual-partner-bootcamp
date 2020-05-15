@@ -406,11 +406,19 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
 
 2. **Design:** Are there any considerations for Helm v3 which will impact the configuration of your cluster?
 
-    **Solution:**
+    **Solution:** For RBAC enabled clusters, Helm v2 required a service account and rolebinding for the Tiller service which required granting the Tiller service account access to the namespace(s) where Helm would be used to deploy resources (see [Helm role-based access controls](https://v2.helm.sh/docs/using_helm/#role-based-access-control) for more information). Helm v2 was also based on a client/server architecture which required that even for non-RBAC enabled clusters that Tiller be installed.
+
+    One of the most prevalent changes is that Helm v3 removes this requirement. The client/server architecture has been replaced with a client/library architecture where only the `helm` binary is required. This means that security is now on a per-user basis and effectively delegated to the Kubernetes cluster which is the target of the deployment (see [Migrating Helm v2 to v3](https://helm.sh/docs/topics/v2_v3_migration/) for more information.)
 
 3. **Design:** How will you prevent developers in existing Azure AD security groups from accessing the `default` and `kube-system` namespaces?
 
-    **Solution:**
+    **Solution:** As Contoso Commerce continues to grow and new container-based applications and workloads are developed, they will need to not only have a clear separation in who has access to what in the cluster, but also making sure that each team has a "safe place" to deploy their workloads without impacting existing services becomes critical. For each application/workload that is developed, a dedicated namespace will be created and that development team's associated Azure AD security group will be granted access to that namespace (and only that namespace).
+
+    To ensure that one team cannot use more resources than they should be, [Resource Quotas](https://kubernetes.io/docs/concepts/policy/resource-quotas/) should be created for each namespace and reevaluated periodically to ensure that they meet the needs of the business.
+
+    Overtime, it may even be preferable to extend the namespace model further and provide each development team multiple namespaces that map to the development lifecycle, each with its own unique resource quotas. For example, the e-Commerce team could be provided a namespace for not only their production deployments, but also development and staging depending on their needs.
+
+    Note that while namespaces are abstracted from each other (*.e.g* hidden) they are not isolated by default. Services in one namespace can communicate with services in another namespace, even if the service shares the same name in multiple namespaces (see [Kubernetes best practices: Organizing with Namespaces](https://cloud.google.com/blog/products/gcp/kubernetes-best-practices-organizing-with-namespaces)).
 
 **Application onboarding**
 
