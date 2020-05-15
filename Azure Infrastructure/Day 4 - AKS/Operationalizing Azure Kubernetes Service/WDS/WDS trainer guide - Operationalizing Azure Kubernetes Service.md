@@ -568,7 +568,7 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
       --docker-bridge-address 172.17.0.1/16 \
       --dns-service-ip 10.2.0.10 \
       --service-cidr 10.2.0.0/24 \
-      --generate-ssh-keys
+      --generate-ssh-keys \
       --network-policy azure
     ```
 
@@ -681,7 +681,85 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
 
 1. **Design:** Describe your strategy for both node and pod scaling within the cluster(s). What metrics will you use for scaling? Does your scaling configuration have any impacts on the ability to upgrade your clusters in the future?
 
-    **Solution:**
+    **Solution:** Node scaling will use the [cluster autoscaler](https://docs.microsoft.com/azure/aks/cluster-autoscaler#about-the-cluster-autoscaler) while pods will be scaled within node pools using the [horizontal pod autoscaler](https://docs.microsoft.com/azure/aks/tutorial-kubernetes-scale#autoscale-pods).
+
+    To configure the cluster autoscaler, the feature must first be enabled using the `--enable-cluster-autoscaler` parameter of the `az aks create` command. For example:
+
+    ```sh
+    az aks create \
+      --resource-group constosAKSrg \
+      --name constosoAKScluster \
+      --network-plugin azure \
+      --vnet-subnet-id $subnet_id \
+      --docker-bridge-address 172.17.0.1/16 \
+      --dns-service-ip 10.2.0.10 \
+      --service-cidr 10.2.0.0/24 \
+      --generate-ssh-keys \
+      --network-policy azure \
+      --enable-cluster-autoscaler
+    ```
+
+    Configuration of the cluster autoscaler varies based on whether or not single node or multi-node pools are being used.
+
+    When using a single node pool, the cluster autoscaler minimum and maximum node counts as well as autoscaler profiles can be configured using `az aks update`:
+
+    ```sh
+    az aks update \
+      --resource-group constosAKSrg \
+      --name constosoAKScluster \
+      --update-cluster-autoscaler \
+      --min-count 3 \
+      --max-count 10
+    ```
+
+    With multiple node pools, you must use the `az aks nodepool update` command:
+
+    ```sh
+    az aks nodepool update \
+      --resource-group constosAKSrg \
+      --cluster-name constosoAKScluster \
+      --name iopspool \
+      --update-cluster-autoscaler \
+      --min-count 3 \
+      --max-count 5
+    ```
+
+    Once cluster autoscaling has been enabled, you can further refine the configuration using autoscaler profiles. The profiles have a default configuration and are stored at the cluster level. Autoscaler profiles effect all node pools that have the cluster autoscaler enabled.
+
+    The available profiles are:
+
+    | Setting | Description | Default value |
+    | ------ | ----------- | ------------- |
+    | **scan-interval** | How often cluster is reevaluated for scale up or down | 10 seconds |
+    | **scale-down-delay-after-add** | How long after scale up that scale down evaluation resumes | 10 minutes |
+    | **scale-down-delay-after-delete** | How long after node deletion that scale down evaluation resumes | scan-interval |
+    | **scale-down-delay-after-failure** | How long after scale down failure that scale down evaluation resumes | 3 minutes |
+    | **scale-down-unneeded-time** | How long a node should be unneeded before it is eligible for scale down | 10 minutes |
+    | **scale-down-unready-time** | How long an unready node should be unneeded before it is eligible for scale down | 20 minutes |
+    | **scale-down-utilization-threshold** | Node utilization level, defined as sum of requested resources divided by capacity, below which a node can be considered for scale down | 0.5 |
+    | **max-graceful-termination-sec** | Maximum number of seconds the cluster autoscaler waits for pod termination when trying to scale down a node. | 600 seconds |
+    | **balance-similar-node-groups** | Detect similar node pools and balance the number of nodes between them | false |
+
+    To set a value for a cluster autoscaler profile, you need to use the `aks-preview` Azure CLI extension:
+
+    ```sh
+    # Install the aks-preview extension
+    az extension add --name aks-preview
+
+    # Update the extension to make sure you have the latest version installed
+    az extension update --name aks-preview
+    ```
+
+    You can then use `az aks update` with the `--cluster-autoscaler-profile` parameter to set values as required:
+
+    ```sh
+    az aks update \
+      --resource-group constosAKSrg \
+      --name constosoAKScluster \
+      --cluster-autoscaler-profile scan-interval=30s
+    ```
+
+    Remember, when you upgrade your AKS cluster, a new node is deployed into the cluster. Services and workloads begin to run on the new node, and an older node is removed from the cluster. This rolling upgrade process requires a minimum of one additional block of IP addresses to be available - making your node count is then n + 1. You must have enough IP addresses available if using Azure CNI.
 
 2. **Design:** With a bursty application such as the e-Commerce platform, what scaling methodology will you employ to ensure that scale operations can happen as fast as possible?
 
