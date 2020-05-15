@@ -618,6 +618,8 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
 
     This will likely require the implementation of a [load-balancing service](https://docs.microsoft.com/azure/aks/aks-migration#high-availability-and-business-continuity) that is external to the cluster such as Azure Application Gateway, Azure Traffic Manager, or Azure Front Door Service.
 
+    ![AKS with Azure Traffic Manager in two regions](images/aks-azure-traffic-manager.png)
+
     Ultimately, you will need to undertake an assessment of the time it takes to deploy the workloads required and perform any data migrations to further refine your approach.
 
 3. **Design:** What would you recommend to automate the execution of deployments based on the approach Contoso Commerce has used to-date?
@@ -682,6 +684,8 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
 1. **Design:** Describe your strategy for both node and pod scaling within the cluster(s). What metrics will you use for scaling? Does your scaling configuration have any impacts on the ability to upgrade your clusters in the future?
 
     **Solution:** Node scaling will use the [cluster autoscaler](https://docs.microsoft.com/azure/aks/cluster-autoscaler#about-the-cluster-autoscaler) while pods will be scaled within node pools using the [horizontal pod autoscaler](https://docs.microsoft.com/azure/aks/tutorial-kubernetes-scale#autoscale-pods).
+
+    **Cluster autoscaler**
 
     To configure the cluster autoscaler, the feature must first be enabled using the `--enable-cluster-autoscaler` parameter of the `az aks create` command. For example:
 
@@ -761,6 +765,26 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
 
     Remember, when you upgrade your AKS cluster, a new node is deployed into the cluster. Services and workloads begin to run on the new node, and an older node is removed from the cluster. This rolling upgrade process requires a minimum of one additional block of IP addresses to be available - making your node count is then n + 1. You must have enough IP addresses available if using Azure CNI.
 
+    **Horizontal pod autoscaler**
+
+    Kubernetes supports [horizontal pod autoscaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) to adjust the number of pods in a deployment depending on CPU utilization or other select metrics. The [Metrics Server](https://kubernetes.io/docs/tasks/debug-application-cluster/resource-metrics-pipeline/#metrics-server) is used to provide resource utilization to Kubernetes, and is automatically deployed in AKS clusters today.
+
+    To use the autoscaler, all containers in your pods and your pods must have CPU requests and limits defined. For example:
+
+    ```yaml
+    resources:
+      requests:
+        cpu: 250m
+      limits:
+        cpu: 500m
+    ```
+
 2. **Design:** With a bursty application such as the e-Commerce platform, what scaling methodology will you employ to ensure that scale operations can happen as fast as possible?
 
-    **Solution:**
+    **Solution:** To rapidly scale your AKS cluster, you can integrate with Azure Container Instances (ACI). Kubernetes has built-in components to scale the replica and node count. However, if your application needs to rapidly scale, the horizontal pod autoscaler may schedule more pods than can be provided by the existing compute resources in the node pool. If configured, this scenario would then trigger the cluster autoscaler to deploy additional nodes in the node pool, but it may take a few minutes for those nodes to successfully provision and allow the Kubernetes scheduler to run pods on them.
+
+    ![Architecture diagram of AKS cluster bursting into Azure Container Instances](images/burst-scaling.png)
+
+    ACI lets you quickly deploy container instances without additional infrastructure overhead. When you connect with AKS, ACI becomes a secured, logical extension of your AKS cluster. The virtual nodes component, which is based on Virtual Kubelet, is installed in your AKS cluster that presents ACI as a virtual Kubernetes node. Kubernetes can then schedule pods that run as ACI instances through virtual nodes, not as pods on VM nodes directly in your AKS cluster.
+
+    **Note:** Virtual nodes are currently in preview in AKS and carry the same considerations discussed for Ubuntu 18.04 earlier.
