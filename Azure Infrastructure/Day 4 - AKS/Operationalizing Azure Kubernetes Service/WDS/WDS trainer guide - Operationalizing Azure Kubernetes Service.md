@@ -551,13 +551,44 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
 
 3. **Design:** What considerations are there for network security with pods being exposed directly to the virtual network?
 
-    **Solution:**
+    **Solution:** There are a number of considerations for securing not only your pods, but also the traffic between those pods. All pods in an AKS cluster can send and receive traffic without limitations, by default. Network Policy in Kubernetes will allow us to define rules for ingress and egress within the cluster.
+
+    Network Policy is a Kubernetes specification that defines access policies for communication between pods. Using Network Policies, we define an ordered set of rules to send and receive traffic and apply them to a collection of pods that match one or more label selectors. Network policies can be defined in one-off manifests or as a part of a wider manifest which creates a deployment or a service.
+
+    AKS supports two ways to implement network policy - *Azure Network Policies* or *Calico Network Policies* (see [Differences between Azure and Calico policies and their capabilities](https://docs.microsoft.com/azure/aks/use-network-policies#differences-between-azure-and-calico-policies-and-their-capabilities)).
+
+    Network Policy and the selection of Azure or Calico policy must be selected at the time the cluster is created and cannot be added later. This can be done with the `--network-policy` argument of the `az aks create` command. Extending the command we used to create the cluster earlier with CNI, we would end up with:
+
+    ```sh
+    az aks create \
+      --resource-group constosAKSrg \
+      --name constosoAKScluster \
+      --network-plugin azure \
+      --vnet-subnet-id $subnet_id \
+      --docker-bridge-address 172.17.0.1/16 \
+      --dns-service-ip 10.2.0.10 \
+      --service-cidr 10.2.0.0/24 \
+      --generate-ssh-keys
+      --network-policy azure
+    ```
+
+    After the cluster is provisioned, traffic rules can be targeted to namespaces, allowing for flexibility in policy enforcement on a workload-by-workload basis.
+
+    For more information, see [Secure traffic between pods using network policies in Azure Kubernetes Service (AKS)](https://docs.microsoft.com/azure/aks/use-network-policies).
 
 **Node operating system**
 
 1. **Design:** What considerations are there to deploy AKS clusters for Contoso Commerce with Ubuntu 18.04? Are there material impacts to the business if they move forward with their current plan?
 
-    **Solution:**
+    **Solution:** AKS now supports Ubuntu 18.04 as the node operating system (OS), however this feature is in preview. During this preview period, both Ubuntu 16.04 and Ubuntu 18.04 are available.
+
+    As a preview feature, a very important consideration here is Microsoft's [Supplemental Terms of Use for Microsoft Azure Previews](https://azure.microsoft.com/support/legal/preview-supplemental-terms/) which state:
+
+    > *PREVIEWS ARE PROVIDED "AS-IS," "WITH ALL FAULTS," AND "AS AVAILABLE," AND ARE EXCLUDED FROM THE SERVICE LEVEL AGREEMENTS AND LIMITED WARRANTY. Previews may not be covered by customer support. Previews may be subject to reduced or different security, compliance and privacy commitments, as further explained in the [Microsoft Online Services Privacy Statement](https://go.microsoft.com/fwlink/?LinkId=131004&clcid=0x409), [Microsoft Azure Trust Center](https://azure.microsoft.com/overview/trusted-cloud/), the [Online Services Terms](https://www.microsoftvolumelicensing.com/DocumentSearch.aspx?Mode=3&DocumentTypeId=31), and any additional notices provided with the Preview. Customers should not use Previews to process Personal Data or other data that is subject to heightened compliance requirements... We may change or discontinue Previews at any time without notice. We also may choose not to release a Preview into "General Availability."*
+
+    Also consider that in a default configuration, AKS does not come with an SLA which is a risk for any implementation, perhaps even more so for a service provider who is providing services around the management of AKS for customers.
+    
+    As of March 2020, an [Azure Kubernetes Service (AKS) Uptime SLA](https://azure.microsoft.com/support/legal/sla/kubernetes-service/v1_1/) is available, 
 
 2. **Design:** Contoso Commerce will need a "go-forward" plan as new versions of Ubuntu become available. What approach would you recommend they take to perform rapid testing of new operating systems with support for Kubernetes and how would you implement your approach?
 
