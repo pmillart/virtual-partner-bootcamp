@@ -55,9 +55,9 @@
         
 
 * The **For each** step has the following attributes:
-    * Select an output from previous steps: [Value]
-    * Add a Compose step and make it look like the following graphic
-    ![](images/compose-step1.png)
+    * Select an output from previous steps: [Value]  
+    * Add a Compose step and make it look like the following graphic   
+    ![](images/compose-step1.png)  
     * Add a Cosmos DB **Create or update document** step
         * Database ID: Select the Cosmos DB created from the Icebreaker app
         * Collection ID: ActiveUsers
