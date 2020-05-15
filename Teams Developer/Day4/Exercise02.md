@@ -34,7 +34,7 @@ https://portal.azure.com
     * To run the bot click on the COVID19 Triage scenario
     * Then click the Run button at the top  
     ![](images/run%20button.png)
-    * You will notice the chat window populate with information and also the Designer will highlight which part of the process it is currently in. You can proceed through the Triage bot answering each question till the end. To stop the bot you can click Exit again.
+    * You will notice the chat window populate with information and also the Designer will highlight which part of the process it is currently in. You can proceed through the Triage bot answering each question till the end. To stop the bot you can click Exit again.  
     ![](images/testbot.png)
 ## Success criteria
 
