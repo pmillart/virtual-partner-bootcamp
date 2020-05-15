@@ -26,6 +26,11 @@ Microsoft and the trademarks listed at https://www.microsoft.com/legal/intellect
 
 <!-- TOC -->
 
+- [Trainer information](#trainer-information)
+  - [Role of the trainer](#role-of-the-trainer)
+  - [Whiteboard design session flow](#whiteboard-design-session-flow)
+  - [Before the whiteboard design session: How to prepare](#before-the-whiteboard-design-session-how-to-prepare)
+  - [During the whiteboard design session: Tips for an effective whiteboard design session](#during-the-whiteboard-design-session-tips-for-an-effective-whiteboard-design-session)
 - [Operationalizing Azure Kubernetes Service whiteboard design session student guide](#operationalizing-azure-kubernetes-service-whiteboard-design-session-student-guide)
   - [Abstract and learning objectives](#abstract-and-learning-objectives)
   - [Step 1: Review the customer case study](#step-1-review-the-customer-case-study)
@@ -41,8 +46,104 @@ Microsoft and the trademarks listed at https://www.microsoft.com/legal/intellect
     - [Presentation](#presentation)
   - [Wrap-up](#wrap-up)
   - [Additional references](#additional-references)
+- [Operationalizing Azure Kubernetes Service whiteboard design session trainer guide](#operationalizing-azure-kubernetes-service-whiteboard-design-session-trainer-guide)
+  - [Step 1: Review the customer case study](#step-1-review-the-customer-case-study-1)
+  - [Step 2: Design a proof of concept solution](#step-2-design-a-proof-of-concept-solution-1)
+  - [Step 3: Present the solution](#step-3-present-the-solution-1)
+  - [Wrap-up](#wrap-up-1)
+  - [Preferred solution](#preferred-solution)
 
 <!-- /TOC -->
+
+# Trainer information
+
+Thank you for taking time to support the whiteboard design sessions as a trainer!
+
+## Role of the trainer
+
+An amazing trainer:
+
+- Creates a safe environment in which learning can take place.
+- Stimulates the participant's thinking.
+- Involves the participant in the learning process.
+- Manages the learning process (on time, on topic, and adjusting to benefit participants).
+- Ensures individual participant accountability.
+- Ties it all together for the participant.
+- Provides insight and experience to the learning process.
+- Effectively leads the whiteboard design session discussion.
+- Monitors quality and appropriateness of participant deliverables.
+- Effectively leads the feedback process.
+
+## Whiteboard design session flow
+
+Each whiteboard design session uses the following flow:
+
+**Step 1: Review the customer case study (15 minutes)**
+
+**Outcome**
+
+Analyze your customer's needs.
+
+- Customer's background, situation, needs and technical requirements
+- Current customer infrastructure and architecture
+- Potential issues, objectives and blockers
+
+**Step 2: Design a proof of concept solution (60 minutes)**
+
+**Outcome**
+
+Design a solution and prepare to present the solution to the target customer audience in a 15-minute chalk-talk format.
+
+- Determine your target customer audience.
+- Determine customer's business needs to address your solution.
+- Design and diagram your solution.
+- Prepare to present your solution.
+
+**Step 3: Present the solution (30 minutes)**
+
+**Outcome**
+
+Present solution to your customer:
+
+- Present solution
+- Respond to customer objections
+- Receive feedback
+
+**Wrap-up (15 minutes)**
+
+- Review preferred solution
+
+## Before the whiteboard design session: How to prepare
+
+Before conducting your first whiteboard design session:
+
+- Read the Student guide (including the case study) and Trainer guide.
+- Become familiar with all key points and activities.
+- Plan the point you want to stress, which questions you want to drive, transitions, and be ready to answer questions.
+- Prior to the whiteboard design session, discuss the case study to pick up more ideas.
+- Make notes for later.
+
+## During the whiteboard design session: Tips for an effective whiteboard design session
+
+**Refer to the Trainer guide** to stay on track and observe the timings.
+
+**Do not expect to memorize every detail** of the whiteboard design session.
+
+When participants are doing activities, you can **look ahead to refresh your memory**.
+
+- **Adjust activity and whiteboard design session pace** as needed to allow time for presenting, feedback, and sharing.
+- **Add examples, points, and stories** from your own experience. Think about stories you can share that help you make your points clearly and effectively.
+- **Consider creating a "parking lot"** to record issues or questions raised that are outside the scope of the whiteboard design session or can be answered later. Decide how you will address these issues, so you can acknowledge them without being derailed by them.
+
+***Have fun**! Encourage participants to have fun and share!*
+
+**Involve your participants.** Talk and share your knowledge but always involve your participants, even while you are the one speaking.
+
+**Ask questions** and get them to share to fully involve your group in the learning process.
+
+**Ask first**, whenever possible. Before launching into a topic, learn your audience's opinions about it and experiences with it. Asking first enables you to assess their level of knowledge and experience, and leaves them more open to what you are presenting.
+
+**Wait for responses**. If you ask a question such as, "What's your experience with (fill in the blank)?" then wait. Do not be afraid of a little silence. If you leap into the silence, your participants will feel you are not serious about involving them and will become passive. Give participants a chance to think, and if no one answers, patiently ask again. You will usually get a response.
 
 # Operationalizing Azure Kubernetes Service whiteboard design session student guide
 
@@ -256,3 +357,119 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
 | Scaling options for applications in Azure Kubernetes Service (AKS) | <https://docs.microsoft.com/azure/aks/concepts-scale> |
 | Security concepts for applications and clusters in Azure Kubernetes Service (AKS) | <https://docs.microsoft.com/azure/aks/concepts-security> |
 | Security hardening for AKS agent node host OS | <https://docs.microsoft.com/azure/aks/security-hardened-vm-host-image> |
+
+# Operationalizing Azure Kubernetes Service whiteboard design session trainer guide
+
+## Step 1: Review the customer case study
+
+- Check in with your table participants to introduce yourself as the trainer.
+- Ask, "What questions do you have about the customer case study?"
+- Briefly review the steps and time frames of the whiteboard design session.
+- Ready, set, go! Let the table participants begin.
+
+## Step 2: Design a proof of concept solution
+
+- Check in with your tables to ensure that they are transitioning from step to step on time.
+- Provide some feedback on their responses to the business needs and design.
+  - Try asking questions first that will lead the participants to discover the answers on their own.
+- Provide feedback for their responses to the customer's objections.
+  - Try asking questions first that will lead the participants to discover the answers on their own.
+
+## Step 3: Present the solution
+
+- Determine which table will be paired with your table before Step 3 begins.
+- For the first round, assign one table as the presenting team and the other table as the customer.
+- Have the presenting team present their solution to the customer team.
+  - Have the customer team provide one objection for the presenting team to respond to.
+  - The presentation, objections, and feedback should take no longer than 15 minutes.
+  - If needed, the trainer may also provide feedback.
+
+## Wrap-up
+
+- Have the table participants reconvene with the larger session group to hear the facilitator/SME share the following preferred solution.
+
+## Preferred solution
+
+**Operator and developer access**
+
+1. **Design:** What authentication method would you recommend for access to the API server in AKS through tooling like `kubectl`? What impacts does your selection have on the configuration of clusters going forward? 
+  
+    **Solution:**
+
+   1. **Design:** If you alter the current identity model, how will you translate existing roles and cluster role bindings to the new identity model?
+
+      **Solution:**
+
+2. **Design:** Are there any considerations for Helm v3 which will impact the configuration of your cluster?
+
+    **Solution:**
+
+3. **Design:** How will you prevent developers in existing Azure AD security groups from accessing the `default` and `kube-system` namespaces?
+
+    **Solution:**
+
+**Application onboarding**
+
+1. **Design:** What types of compute would you recommend for applications with high IOPS requirements? If a future application or workload requires another type of compute how would you incorporate it into Contoso Commerce's cluster(s)?
+
+    **Solution:**
+
+2. **Design:** What IP addressing scheme would you recommend to Contoso Commerce to best balance resource usage for nodes and pods?
+
+    **Solution:**
+
+   1. **Design:** How did you accommodate future growth and cluster upgrades in your IP address scheme?
+
+      **Solution:**
+
+3. **Design:** What considerations are there for network security with pods being exposed directly to the virtual network?
+
+    **Solution:**
+
+**Node operating system**
+
+1. **Design:** What considerations are there to deploy AKS clusters for Contoso Commerce with Ubuntu 18.04? Are there material impacts to the business if they move forward with their current plan?
+
+    **Solution:**
+
+2. **Design:** Contoso Commerce will need a "go-forward" plan as new versions of Ubuntu become available. What approach would you recommend they take to perform rapid testing of new operating systems with support for Kubernetes and how would you implement your approach?
+
+    **Solution:**
+
+**Migration**
+
+1. **Design:** How will you migrate existing applications from the current cluster to a new cluster for validation?
+
+    **Solution:**
+
+2. **Design:** How will you minimize downtime for currently running workloads?
+
+    **Solution:**
+
+3. **Design:** What would you recommend to automate the execution of deployments based on the approach Contoso Commerce has used to-date?
+
+    **Solution:**
+
+**Operations and monitoring**
+
+1. **Design:** How will you collect and monitor cluster, node, and pod health and performance? Where will the logs be stored and how will they be accessed?
+
+    **Solution:**
+
+2. **Design:** What will you use to visual logs for each application team?
+
+    **Solution:**
+
+3. **Design:** How will you ensure that access to logs is read-only?
+
+    **Solution:**
+
+**Scaling**
+
+1. **Design:** Describe your strategy for both node and pod scaling within the cluster(s). What metrics will you use for scaling? Does your scaling configuration have any impacts on the ability to upgrade your clusters in the future?
+
+    **Solution:**
+
+2. **Design:** With a bursty application such as the e-Commerce platform, what scaling methodology will you employ to ensure that scale operations can happen as fast as possible?
+
+    **Solution:**
