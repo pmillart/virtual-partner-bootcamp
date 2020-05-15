@@ -453,13 +453,101 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
     - A taint is applied to a node that indicates only specific pods can be scheduled on them.
     - A toleration is then applied to a pod that allows them to tolerate a node's taint.
 
+    Taints can be applied to a node pool using the `--node-taints` parameter of the `az aks nodepool add` command. For example:
+
+    ```sh
+    az aks nodepool add --node-taints aks-iopspool-28993262-vmss000000 sku=iops:Schedule
+    ```
+
+    **Note:** The `--node-taints` parameter is adding a taint to a node pool based on the clusters internal name for the pool - not the friendly name you used when you created the node pool originally. To find this name, you need to authenticate to the cluster and run `kubectl get nodes`.
+
+    Creating pods and specifying a toleration of `sku=iops:Schedule` will allow the pod to be scheduled on the specified node pool. For example:
+
+    ```yaml
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: iopspod
+    spec:
+      containers:
+      - image: nginx:1.15.9
+        name: iopspod
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 1
+            memory: 2G
+      tolerations:
+      - key: "sku"
+        operator: "Equal"
+        value: "iops"
+        effect: "schedule"
+    ```
+
 2. **Design:** What IP addressing scheme would you recommend to Contoso Commerce to best balance resource usage for nodes and pods?
 
-    **Solution:**
+    **Solution:**  When the new cluster is provisioned, it will need to be configured for Azure CNI networking (see [Configure Azure CNI networking in Azure Kubernetes Service (AKS)](https://docs.microsoft.com/azure/aks/configure-azure-cni)) so that each pod can be exposed directly to the subnet directly through a private IP.
+
+    Creating a new cluster with CNI will require several pieces of information:
+
+    - **Virtual network** with defined address range.
+    - **Subnet** with defined address range. The subnet must be large enough to accommodate the nodes, pods, and all Kubernetes and Azure resources that need to be deployed with your cluster. This includes resources such as internal Azure Load Balancer(s).
+    - **Kubernetes service address range** which is not used by any network element connected to the **virtual network**.
+    - **Kubernetes DNS service IP address** which defines an IP address within your **Kubernetes service address range** that is used for cluster discovery.
+    - **Docker bridge address** which represents the default *docker0* bridge present in all Docker installations. This must be a CIDR range that does not collide with the rest of the CIDRs on your network, including the cluster and pod CIDR ranges.
+
+    To calculate the minimum node and pod subnet size including an additional node for upgrade operations:
+
+    ```sh
+    (number of nodes + 1) + ((number of nodes + 1) * maximum pods per node that you configure)
+    ```
+
+    Consider that each node in the cluster today runs up to 100 pods comfortably with only the existing e-Commerce platform in place. To accommodate just the existing cluster and its default node pool assuming 100 pods per node:
+
+    ```sh
+    ((3 + 1) + ((3 + 1) * 110) = 444 IPs required
+    ```
+
+    **Note:** Even though 100 pods run the existing workload, we want to ensure there is slight overhead for system pods. 10 was used here as that is the minimum value of maximum number of pods per node when using Azure CNI (see [Configure maximum - new clusters](https://docs.microsoft.com/azure/aks/configure-azure-cni#configure-maximum---new-clusters)).
+
+    As we do not know the IP addressing requirements of the new data analytics workload, we will assume the same number of pods per node (even though those will be running on a different node pool). This would mean we need another *444* IPs for another 3 node pool, bringing our total cluster nodes to 6 (3 per node pool) and our minimum IP requirements to *888*. With the minimal requirements, we would need an IP range of *at least* a `/22`:
+
+    ```sh
+    10.0.0.0/22 = 10.0.0.0 - 10.0.3.255 (1,022 addresses)
+    ```
+
+    Of course, this does limit us for future growth as we only have *134* IPs remaining. To allow for meaningful future growth, it is recommended to use at least a `/21`.
+
+    ```sh
+    10.0.0.0/21 = 10.0.0.0. - 10.0.7.255 (2046 addresses)
+    ```
+
+    Once you know all of your address ranges, you can proceed to create your virtual network. Once your virtual network resource has been provisioned and you have retrieved the resource ID of the subnet you want to use for IP allocation to nodes and pods you can create your cluster:
+
+    ```sh
+    # retrieve the subnet resource. e.g.:
+    # /subscriptions/<guid>/resourceGroups/constosAKSrg/providers/Microsoft.Network/virtualNetworks/constosAKSvnet/subnets/default
+    subnet_id=az network vnet subnet list \
+      --resource-group constosAKSrg \
+      --vnet-name constosAKSvnet \
+      --query "[0].id" --output tsv
+
+    az aks create \
+      --resource-group constosAKSrg \
+      --name constosoAKScluster \
+      --network-plugin azure \
+      --vnet-subnet-id $subnet_id \
+      --docker-bridge-address 172.17.0.1/16 \
+      --dns-service-ip 10.2.0.10 \
+      --service-cidr 10.2.0.0/24 \
+      --generate-ssh-keys
+    ```
 
    1. **Design:** How did you accommodate future growth and cluster upgrades in your IP address scheme?
 
-      **Solution:**
+      **Solution:** The number of IP addresses required should include considerations for upgrade and scaling operations. If you set the IP address range to only support a fixed number of nodes, you cannot upgrade or scale your cluster.
 
 3. **Design:** What considerations are there for network security with pods being exposed directly to the virtual network?
 
