@@ -392,13 +392,17 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
 
 **Operator and developer access**
 
-1. **Design:** What authentication method would you recommend for access to the API server in AKS through tooling like `kubectl`? What impacts does your selection have on the configuration of clusters going forward? 
+1. **Design:** What authentication method would you recommend for access to the API server in AKS through tooling like `kubectl`? What impacts does your selection have on the configuration of clusters going forward?
   
-    **Solution:**
+    **Solution:** Azure Kubernetes Service (AKS) can be configured to use Azure Active Directory (Azure AD) for user authentication. In this configuration, users can sign in to an AKS cluster by using your Azure AD authentication token.
+
+    Cluster administrators can configure Kubernetes role-based access control (RBAC) based on a user's identity or directory group membership.
+
+    This is the ideal solution as Contoso Commerce has expressed they would like to grant existing users and security groups in their Azure AD access to the cluster to perform day-to-day activities (*e.g.* deployments for a workload by an application developer).
 
    1. **Design:** If you alter the current identity model, how will you translate existing roles and cluster role bindings to the new identity model?
 
-      **Solution:**
+      **Solution:** Discovery will need to be performed on the current cluster to determine what security principals have access to the cluster and which namespaces those principals have access to. Discovery could be extensive and should be accounted for.
 
 2. **Design:** Are there any considerations for Helm v3 which will impact the configuration of your cluster?
 
