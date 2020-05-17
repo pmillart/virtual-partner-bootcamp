@@ -1,7 +1,7 @@
 ![Microsoft Cloud Workshops](https://github.com/Microsoft/MCW-Template-Cloud-Workshop/raw/master/Media/ms-cloud-workshop.png "Microsoft Cloud Workshops")
 
 <div class="MCWHeader1">
-Enterprise-ready cloud
+Operationalizing Azure Kubernetes Service
 </div>
 
 <div class="MCWHeader2">
@@ -9,7 +9,7 @@ Whiteboard design session student guide
 </div>
 
 <div class="MCWHeader3">
-March 2020
+May 2020
 </div>
 
 Information in this document, including URL and other Internet Web site references, is subject to change without notice. Unless otherwise noted, the example companies, organizations, products, domain names, e-mail addresses, logos, people, places, and events depicted herein are fictitious, and no association with any real company, organization, product, domain name, e-mail address, logo, person, place or event is intended or should be inferred. Complying with all applicable copyright laws is the responsibility of the user. Without limiting the rights under copyright, no part of this document may be reproduced, stored in or introduced into a retrieval system, or transmitted in any form or by any means (electronic, mechanical, photocopying, recording, or otherwise), or for any purpose, without the express written permission of Microsoft Corporation.
@@ -177,7 +177,7 @@ Directions: With all participants at your table, respond to the following questi
 
 **Application onboarding**
 
-1. What types of compute would you recommend for applications with high IOPS requirements? If a future application or workload requires another type of compute how would you incorporate it into Contoso Commerce's cluster(s)?
+1. What types of compute would you recommend for applications with high IOPS requirements? If a future application or workload requires another type of compute how would you incorporate it into Contoso Commerce's cluster(s) and that the compute can only be utilized by the workload is was created to host? How would you implement your solution in AKS?
 2. What IP addressing scheme would you recommend to Contoso Commerce to best balance resource usage for nodes and pods?
    1. How did you accommodate future growth and cluster upgrades in your IP address scheme?
 3. What considerations are there for network security with pods being exposed directly to the virtual network?
@@ -196,7 +196,7 @@ Directions: With all participants at your table, respond to the following questi
 **Operations and monitoring**
 
 1. How will you collect and monitor cluster, node, and pod health and performance? Where will the logs be stored and how will they be accessed?
-2. What will you use to visual logs for each application team?
+2. What will you use to visualize logs for each application team?
 3. How will you ensure that access to logs is read-only?
 
 **Scaling**

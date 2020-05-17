@@ -1,0 +1,22 @@
+# SSH keys
+id_rsa
+id_rsa.pub
+
+# Mac
+.DS_Store
+
+# Word temporary
+~$*.doc*
+~$*.tmp*
+
+# Excel temporary
+~$*.xls*
+
+# Excel Backup File
+*.xlk
+
+# PowerPoint temporary
+~$*.ppt*
+
+# Visio autosave temporary files
+*.~vsd*
