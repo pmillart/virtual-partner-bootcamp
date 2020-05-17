@@ -231,6 +231,10 @@ Your challenge is to redesign your operations processes for horizontal scale. Yo
 
 6.  **PaaS monitoring** CCS are experienced at monitoring IaaS-based workloads. They are less experienced with PaaS workloads, and are unsure what level of monitoring they need to implement vs what is taken care of by the cloud provider. As the number of managed PaaS applications increases, they need to define best practice patterns for SQL Database and Web App monitoring and alerts.
 
+7.  **VM and server compliance** An internal security audit recently identified several on-premises and Azure servers which did not comply with CCS standards. They need a way to prevent this happening in future.
+
+8.  **Cost management** As Azure spending increases, there have been several incidents in which CCS customers have complained about unnecessary spend on their Azure bill or questioned the value that Azure is bringing to their organization. CCS need a way to manage, report and optimize Azure costs for their customers.
+
 ### Customer objections 
 
 1.  Cost is a concern. As well as being cost-efficient, CCS prefer solutions that keep any costs associated with managing a customer solution within the customer subscription, rather than centralizing management costs into a CCS subscription and then having to apportion across customers.
@@ -302,6 +306,19 @@ Directions: With all participants in your group, respond to the following questi
 
     A customer raises a support ticket claiming their application is 'slow'. How can your monitoring help investigate the cause?
 
+7.  **VM and server compliance**  Propose a solution that enables CCS to audit the compliance of their entire server estate - Windows and Linux, on-premises and cloud.
+
+    Your solution should support a wide range of common OS configuration issues, such as members of the local administrator group, password complexity, installed applications, and trusted certificates. The solution should also be extensible to support new issues as required by CCS.
+
+    Explain how this solution scales to all CCS customers.
+
+8.  **Cost management** Explain how CCS can meet their cost management requirements. These include:
+    - Visibility into current and historical spend, with the ability to segment the data by a variety of categories (such as location, resource type, or tags)
+    - Forecast of future spend
+    - Cost saving recommendations
+    - Configuration of spending alerts, including alerting at 1-day granularity in case of a spike in spending
+
+    Cost reports should be available to customers, including CSP customers. However, any CSP discounts should be confidential to CCS.
 
 **Prepare**
 
@@ -346,14 +363,22 @@ Directions: Tables reconvene with the larger group to hear the facilitator/SME s
 
 ##  Additional references
 
-TO DO
-
-|    |            |
-|----------|:-------------:|
-| **Description** | **Links** |
-| Microsoft Azure Reference Architectures| <https://docs.microsoft.com/azure/guidance/guidance-architecture> |
-| Azure Lighthouse documentation | <https://docs.microsoft.com/azure/lighthouse/> |
-| Azure Backup documentation | <https://docs.microsoft.com/azure/backup/> |
+|                                         |                                                                   |
+|-----------------------------------------|:-----------------------------------------------------------------:|
+| **Description**                         | **Links**                                                         |
+| Microsoft Azure Reference Architectures | <https://docs.microsoft.com/azure/guidance/guidance-architecture> |
+| Azure Lighthouse                        | <https://docs.microsoft.com/azure/lighthouse/>                    |
+| Azure Backup Explorer                   | <https://docs.microsoft.com/azure/backup/monitor-azure-backup-with-backup-explorer>                        |
+| Azure Arc for Servers                   | <https://docs.microsoft.com/azure/azure-arc/servers/overview>     |
+| VM Guest Policy                         | <https://docs.microsoft.com/azure/governance/policy/concepts/guest-configuration>     |
+| Azure Monitor for VMs                   | <https://docs.microsoft.com/azure/azure-monitor/insights/vminsights-overview>   |
+| Azure Automation                        | <https://docs.microsoft.com/azure/automation/automation-intro>   |
+| Azure Update Management                 | <https://docs.microsoft.com/azure/automation/automation-update-management>  |
+| Web App monitoring                      | <https://docs.microsoft.com/azure/architecture/reference-architectures/app-service-web-app/app-monitoring> |
+| SQL Database monitoring                 | <https://docs.microsoft.com/azure/sql-database/sql-database-monitor-tune-overview>    |
+| Azure Cost Management                   | <https://docs.microsoft.com/en-us/azure/cost-management-billing/ > |
+|                                         |                                                                   |
+                                        
 
 # Building a resilient IaaS architecture whiteboard design session trainer guide
 
@@ -436,7 +461,7 @@ The registrationDefinition creates the customer/partner relationship. The custom
 Alternatively, the partner can publish their managed service offering via the Azure Marketplace. To do this, they will need to enrol in the 'Commercial Marketplace' program via Partner Center. This requires a Silver or Gold 'Cloud Platform' competency. The partner will then create a 'Managed Service' offering, specifying all the details included in the registration definition as described above (tenantID, roles, objectIDs) in addition to a description of their service. The customer can then enrol with the partner through this Marketplace offer, rather than by deploying a template. (This enrolment also creates a `Microsoft.ManagedServices/registrationDefinitions` resource in the customer subscription, so the two approaches work the same way.)
 
 
-1.  **Backup configuration and monitoring** How can CCS monitor Azure Backup health? Design a solution that enables:
+2.  **Backup configuration and monitoring** How can CCS monitor Azure Backup health? Design a solution that enables:
     - Visibility into backup health across all customers
     - Identify VMs without backup enabled
     - Raise alerts upon backup failure, across all customers
@@ -474,7 +499,28 @@ A separate policy assignment will be needed in each customer subscription. In ad
 
 *Solution*
 
-TO DO
+Azure Update Management offers a comprehensive cloud-based solution for patch management. It supports any server: Windows or Linux, Azure or on-premises, or other clouds.
+
+Azure Update Management is implemented using Azure Log Analytics and Azure Automation. For a list of supported regions, see [https://docs.microsoft.com/azure/automation/how-to/region-mappings].  There is no cost for using Update Management, you only pay for the data stored in Log Analytics.
+
+Each server being managed must be enrolled in Azure Log Analytics - that is, it must have the Log Analytics agent (aka Microsoft Monitoring Agent or MMA) installed.
+
+Azure Virtual Machines can be on-boarded to Log Analytics directly from the Azure portal, using the VM blade or the Log Analytics blade. For automatic deployment at scale, there are two approaches:
+- You can use Security Center to on-board each VM to Log Analytics (see Security Center > Pricing & settings > choose subscription > Data Collection).
+- You can use Azure Policy to deploy the Log Analytics extension. There are built-in policies for Windows and Linux VMs and VM scale sets (search definitions for 'Deploy Log Analytics'). These definitions are wrapped into policy initiatives, one for Windows and Linux VMs and one for Windows and Linux VM scale sets). These initiatives include additional policies to onboard the dependency agent requires by Azure Monitor for VMs (see requirements 4 below).
+
+The Security Center approach applies to both existing and new VMs. However, it does not apply to VM scale sets (CHECKING: See [https://github.com/MicrosoftDocs/azure-docs/issues/54946]). The policy approach applies to new VMs and scale sets, and existing VMs can be updated using policy remediation. The policy approach also has the advantage of providing policy compliance reports so you can identify any VMs that are not on-boarded.
+
+On-premises machines will need to be on-boarded to Log Analytics by installing the Log Analytics agent. Versions are available for Windows and Linux, with command-line installation enabling automated deployment.
+
+Once a server is on-boarded to Log Analytics, it must then be on-boarded to Update Management. This can be achieved using the Update Management UI, which under the hood updates a saved search in Log Analytics to identify which servers are on-boarded. Alternatively, you can configure Update Management to simply apply to all servers in Log Analytics (optionally, also including new servers). Windows servers can also be on-boarded from Windows Admin Center.
+
+Azure Update Management is managed from the Azure Automation account. Each account is linked to a single Log Analytics workspace. The recommended approach is to use one Log Analytics workspace per customer (for all subscriptions, if the customer has more than one). As such, update management will need to be performed on a per-customer basis. Unfortunately, there is no built-in facility to use update management across multiple workspaces from a single UI. To streamline the roll-out of  updates, CCS may choose to develop their own tooling to support multiple automation account and workspaces.
+
+Why use a separate workspace per customer, rather than on-board all customers to a single, shared workspace? There are several reasons:
+ - Cost management: A workspace per customer can be placed in the customer subscription. As such, it each customer automatically pays for their consumption. With a shared workspace, CCS would need to either absorb the Log Analytics costs, or implement a bespoke mechanism to apportion costs to their customers based on usage.
+ - Security and Compliance: The Log Analytics workspace potentially contains sensitive data about the customer's production environment. Enterprise customers in particular are unlikely to accept storing this data outside their own subscription.
+
 
 4.  **VM and server monitoring** Design a solution for monitoring Azure VMs and on-premises servers. Your solution should support:
     - Streamlined onboarding of all Azure VMs and selected on-premises servers
@@ -490,7 +536,24 @@ TO DO
 
 *Solution*
 
-TO DO
+Azure Monitor for VMs provides in-depth monitoring for Azure VMs, VM scale sets, and non-Azure servers running on-premises or in other clouds.
+
+Azure Monitor for VMs is a Log Analytics-based solution. As such, initial on-boarding requires installing the Log Analytics agent and registering it to send data to a Log Analytics workspace. This will re-use the workspace already described for Update Management, avoiding additional costs from duplicated data. (Note also that while the Log Analytics agent for Windows can send data to up to 4 workspaces, the Linux agent is limited to a single workspace.)
+
+In addition to the Log Analytics agent, for full functionality the dependency agent should also be installed. This captures process and network connection data from the VM enabling the inbound and outbound VM dependencies to be mapped. This is an optional feature which may not be necessary on all servers. However, it is very useful when planning workload migrations. As with the Log Analytics agent, the dependency agent can be deployed to Azure VMs using Azure policy, and to on-premises servers via the command line.
+
+Once the agents are installed, the final deployment step is to configure the VM insights solution on the Log Analytics workspace. This is straightforward from the VM Insights blade in Azure Monitor; it can also be automated via a template.
+
+Once data is gathered to Log Analytics, it can be used for a wide variety of monitoring scenarios. Azure monitor for VMs includes a number of pre-defined reports, such as 'top N' reports by various metrics such as CPU, memory and disk. The default views, as with Update Management, support a single workspace and therefore will be scoped to a single customer.
+
+However, CCS can also build their own dashboards and charts using Azure Monitor Workbooks and their own Log Analytics queries (the default workbook queries could be a starting point). By using custom queries, CCS can create cross-workspace queries, enabling reports that span multiple customers. Azure Lighthouse plays a critical role here, providing access to workspaces from multiple customers from within the CCS tenant.
+
+This enables CCS to break out of the 'per-customer' operations model and operate much more efficiently.
+
+Unfortunately, there is a limit of 100 workspaces in any single Log Analytics query, so CCS will not be able to scale to all customers in a single dashboard. However, they would be able to consolidate into a small collection of dashboards, each for a group of customers.
+
+Log-based and metric-based alerts can be implemented using Azure Alerts. There is no need for cross-workspace queries in this case. Instead, the alert deployment should be automated using Azure Resource Manager templates, and rolled out across each customer.
+
 
 5.  **Automation of manual tasks** How can CCS automate their manual configuration tasks? Your solution must support:
     - Automation of Azure resource configuration tasks (e.g. VM resize, disk encryption, network changes)
@@ -505,7 +568,20 @@ TO DO
 
 *Solution*
 
-TO DO
+Azure Automation provides a platform for automating Azure resource management tasks, as well as other administration tasks.
+
+Automation can be extended to run outside of Azure using Hybrid Runbook Workers. These are servers deployed into the customer environment, and used to execute automation runbooks. They provide access to on-premises servers and avoid the usage restrictions on Azure sandbox execution environments.
+
+Automation can manage Azure resources, using Azure PowerShell. This supports all resource configuration options such as VM resize, disk encryption, and network changes.
+
+Automation can also execute scripts within Azure VMs, by calling the 'Run Command' VM feature. This allows the automation to specify a separate PowerShell (Windows) or Shell (Linux) script and execute it within the VM. These scripts can execute arbitrary tasks such as software installation, or changing passwords. The maximum script duration is 90 minutes.
+
+For non-Azure servers, the Hybrid Runbook Worker can execute automation runbooks, and through these can remotely administer the on-premises servers. Workers should be configured in each CCS data center. Workers can also be used to remote-execute scripts on Azure VMs without using the Run Command feature.
+
+Within Azure Automation, the output of each job (script execution) can be reviewed, together with details of any error output or exceptions. When using the Run Command feature, the script output is limited to the last 4,096 characters, which should be sufficient to determine success or failure.
+
+To protect CCS IP, the automation account for the runbooks can be located in a CCS-owned subscription. It can access the customer subscriptions using Azure Lighthouse (the Service Principal account associated with the Automation Account must be included in the Lighthouse RBAC configuration). The customers will have no visibility into the automation account or runbooks, protecting CCS IP.
+
 
 6.  **PaaS monitoring** Design a solution for monitoring PaaS services, in particular Azure SQL Database and Azure Web Apps. Your solution should support:
     - Gathering key metrics and log data for alerting and investigation of incidents
@@ -517,29 +593,93 @@ TO DO
 
 *Solution*
 
-TO DO
+As a PaaS service, Web Apps have different monitoring needs than IaaS services, and provides several integrated approaches for monitoring implementation.
+
+Azure Web Apps has built-in support for a wide range of common metrics. Some of these are platform metrics, such as memory consumed and percentage file system used. While Web Apps are a platform service, you are still responsible for choosing the correct instance size and these metrics can be helpful when making that choice. Other metrics reflect application performance, such as response latency or 4xx response count. For a full list, see [https://docs.microsoft.com/azure/app-service/web-sites-monitor#understand-metrics]. These metrics can be used for dashboards and alerts (for example, alerting on a rise in 4xx responses, or latency).
+
+Azure Web Apps also supports integrated logging, wth 5 types of logs supported: application logs, web server logs, error logs, failed request tracing, and deployment logs. Full details are at [https://docs.microsoft.com/azure/app-service/troubleshoot-diagnostic-logs]. These logs can be used for in-depth investigation of issues.
+
+In addition, Web Apps can be integrated with Application Insights (see [https://docs.microsoft.com/azure/azure-monitor/app/app-insights-overview]), for more detailed diagnostics. For example, for Application Insights provides distributed tracing of calls for microservices-based applications.
+
+The basic level of monitoring in Application Insights is agent-based monitoring. This is only available for .NET and .NET Core applications. It is fully integrated into the App Service and can simply be enabled from the Azure portal.
+
+For more advanced monitoring, or for other platforms, the application can be instrumented by installing the Application Insights SDK. This approach also supports custom metrics and events, use of which enables monitoring to be extended to Linux-based workloads.
+
+To gain more insight into the end customer experience, web applications can be instrumented with the Application Insights JavaScript SDK. This gives detailed data on the client-side user experience such as page load times.
+
+Azure SQL Database is also a platform services, and supports a range of appropriate monitoring features. As a starting point, there are a range of metrics which can be viewed in Azure Data Studio or SQL Server Management Studio.
+
+For in-depth monitoring, metrics and logs can be exported to a Log Analytics workspace, and analyzed using Azure SQL Analytics (see [https://docs.microsoft.com/azure/azure-monitor/insights/azure-sql]). This approach only supports SQL Database and SQL Database managed instances, not SQL Server on-premises or in Azure virtual machines. It can scale to multiple databases, but is limited to a single Log Analytics workspace. As with the VM Insights solution CCS will need to use a separate report per customer or build their own cross-workspace queries.
+
+To help tune your database, Database Advisors provides recommendations and automatic tuning options to improve performance. The SQL Intelligent Insights solution compares database performance from the past hour with the past week using AI. This enables proactive maintenance, early detection of degradation, and tailored performance improvements.
 
 
+7.  **VM and server compliance**  Propose a solution that enables CCS to audit the compliance of their entire server estate - Windows and Linux, on-premises and cloud.
+
+    Your solution should support a wide range of common OS configuration issues, such as members of the local administrator group, password complexity, installed applications, and trusted certificates. The solution should also be extensible to support new issues as required by CCS.
+
+    Explain how this solution scales to all CCS customers.
+
+*Solution*
+
+Compliance of Azure VMs can be audited using VM guest policy.  This allows policies to be deployed to an agent running in the VM, and policy compliance reported back through the Azure portal.
+
+A range of built-in policies is available. For Windows VMs, these include checks on time zone, certificates, local administrators, password complexity, installed software, and more. For Linux VMs the range is more limited, but still include password and installed software policies.
+
+You can also build custom guest policies, for both Windows and Linux. These allow CCS to extend the guest policy solution to address any new or existing scenarios not met by the built-in policies. See [https://docs.microsoft.com/azure/governance/policy/how-to/guest-configuration-create and https://docs.microsoft.com/azure/governance/policy/how-to/guest-configuration-create-linux] for details.
+
+This solution can also be extended to on-premises servers using Azure Arc. By installing the Azure Connected Machine agent on on-premises servers, they can be registered as a resource in Azure. This allows VM guest policy to be applied to non-Azure servers, surfacing non-compliance in the same compliance report as the Azure VMs.
+
+VM guest policy only detects issues, it does not fix them. Remediation can be achieved manually or through Azure Automation (see earlier).
+
+Azure Lighthouse does not support Management Groups. As such, the VM guest policy will have to be assigned to each customer subscription separately. This can be automated through Azure Automation. Automation is strongly recommended to enable both consistent deployment and streamlining of future updates. A separate policy assignment means there will be separate compliance reports. For an aggregated report, CCS will need to query the compliance of each policy assignment using the Azure APIs/SDKs, and pool the results.
 
 
+8.  **Cost management** Explain how CCS can meet their cost management requirements. These include:
+    - Visibility into current and historical spend, with the ability to segment the data by a variety of categories (such as location, resource type, or tags)
+    - Forecast of future spend
+    - Cost saving recommendations
+    - Configuration of spending alerts, including alerting at 1-day granularity in case of a spike in spending
 
+    Cost reports should be available to customers, including CSP customers. However, any CSP discounts should be confidential to CCS.
 
+*Solution*
 
+Azure Cost Management is an out-of-the-box cost management solution for Azure. It supports all of the features listed - cost analysis (including segmentation), forecasts, recommendations (shared with Azure Advisor) and alerts.
 
+Alerts can only be configured on cumulative spend (for the month, quarter or year), not daily spend. This makes it hard to alert quickly on a sudden spike in spend which may yet fall below the monthly budget. To mitigate, it's a good idea to review the daily costs report regularly. You can also configure a daily export to a storage account, and use Azure Automation to implement your own daily cost alerts. This approach also scales to multiple customers.
 
-
-
-
-
-
-
+For CSP customers, Azure Cost Management requires that the customer has signed the Microsoft Customer Agreement and purchased an Azure Plan. Cost visibility must be enabled by the partner (CCS) for each customer tenant. CSP customers see costs computed at the Azure pay-as-you-go rates.
 
 ## Checklist of preferred objection handling
 
-TO DO
+1.  Cost is a concern. As well as being cost-efficient, CCS prefer solutions that keep any costs associated with managing a customer solution within the customer subscription, rather than centralizing management costs into a CCS subscription and then having to apportion across customers.
+
+    *Response*
+
+    Most of the solutions proposed can be implemented in the customer's Azure subscription, then accessed by CCS via Azure Lighthouse.
+
+    The largest cost driver is data storage is Log Analytics, which is always placed in the customer subscriptions. These costs can also be reduced by using capacity reservations.
+
+    The only exception is the use of Azure Automation to automate previously manual administrative tasks. This is placed in a CCS subscription to provide access across customers (via Lighthouse) and protect CCS IP. These costs will need to be either absorbed or cross-charged to the customers based on usage.
+
+
+2.  CCS are finding that their new enterprise customers are more demanding regarding security and compliance. How can CCS demonstrate their services meet enterprise standards for secure operations?
+
+    *Response*
+
+    Access to customer subscriptions by CCS staff is secured as follows:
+    - Azure Lighthouse limits the permissions granted to CCS staff to specific roles which are reviewed by the customer in advance
+    - Azure AD multi-factor authentication can be used by CCS to secure staff accounts against compromise
+    - Additional AAD features, such as Privileged Identity Management, can secure accounts in AAD used for CCS staff administration
+    - Azure Policy can be used to control permitted activities, and applies equally to customers and CCS staff accessing customer subscritions via Lighthouse
+    - The Azure Activity Log records all operations, including CCS operations on customer subscriptions using Azure Lighthouse
+
 
 ## Customer quote (to be read back to the attendees at the end)
 
-TO DO
+Azure Lighthouse is a game-changer, enabling us to dramatically streamline our management services hosted in customer subscriptions. We can now create cross-customer management experiences and automated approaches to many of our most common management scenarios. This is a huge improvement on per-customer management. There are still a few areas where per-customer management is required, and we look forward to future improvements.
+
+Jack Walsh, CEO, Contoso Cloud Services
 
 
