@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>LAB GUIDE – includes</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://opsgilitylabs.blob.core.windows.net/lablayout/labstyles.css"></link>
+</head>
+<body>
+<h1 id="challenge-guide">Challenge Guide</h1>
+<h2 id="challenge-2-sentinel-alerting-and-analytics">Challenge 2: Sentinel alerting and analytics</h2>
+<p>Now that you understand the data sources and volume of data that Contoso Finance is contending with, you can begin operationalizing the Sentinel deployment.</p>
+<p>To do this, the first task will be to create unique workbooks for any data sources presented through the <strong>CommonSecurityLog</strong> table in the Log Analytics workspace that is attached to Sentinel. For each unique device vendor found in the log, a workbook will need to be created.</p>
+<p>Once you have an understanding of individual event volumes, you can begin to construct alerting logic around them. For each distinct vendor you found in the log, create a scheduled rule which can alert on events with a severity greater than or equal to five if the event is generated more than 10 times in the last 5 minutes.</p>
+<h2 id="success-criteria">Success Criteria</h2>
+<ul>
+<li>Workbooks have been created to visualize event counts for each unique device vendor found in the <strong>CommonSecurityLog</strong>.
+<ul>
+<li>For each event type in the data source, present a count of events per day in a standard stacked bar chart.</li>
+</ul></li>
+<li>Schedule alert rules have been created for events with a severity greater than or equal to five and alerts are firing for each distinct vendor found in the <strong>CommonSecurityLog</strong>.</li>
+</ul>
+<h2 id="progressing-to-the-next-challenge">Progressing to the next challenge</h2>
+<p>After you have completed the challenge, click the <strong>Mark complete</strong> button to inform your proctor you are ready for review.</p>
+<h2 id="help-resources">Help Resources</h2>
+<ul>
+<li><a href="https://docs.microsoft.com/azure/azure-monitor/platform/workbooks-overview" target="_blank">Azure Monitor Workbooks</a></li>
+<li><a href="https://docs.microsoft.com/azure/data-explorer/kusto/query/sqlcheatsheet" target="_blank">SQL to Kusto query translation</a></li>
+<li><a href="https://docs.microsoft.com/azure/sentinel/tutorial-monitor-your-data" target="_blank">Visualize and monitor your data</a></li>
+<li><a href="https://docs.microsoft.com/azure/azure-monitor/reference/tables/commonsecuritylog" target="_blank">CommonSecurityLog</a></li>
+<li><a href="https://docs.microsoft.com/azure/sentinel/resources" target="_blank">Useful resources for working with Azure Sentinel</a></li>
+</ul>
+</body>
+</html>
