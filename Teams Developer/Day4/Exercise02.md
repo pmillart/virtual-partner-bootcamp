@@ -7,7 +7,7 @@
 <span class="colour" style="color:rgb(36, 41, 46)"></span>
 
 ```
-https://docs.microsoft.com/en-us/healthbot/quickstart-createyourhealthcarebot
+https://admin.healthbot.microsoft.com/
 ```
 
 ## Challenge 2: Select a Healthcare Bot template scenario
