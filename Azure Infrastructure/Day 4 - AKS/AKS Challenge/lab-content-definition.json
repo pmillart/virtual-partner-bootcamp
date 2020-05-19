@@ -1,0 +1,44 @@
+{
+    "Title": "Azure Challenge - Azure Kubernetes Service (AKS) Operations",
+    "Description": "One of your largest customers, Contoso Commerce, has approached you about taking on operations surrounding an existing customer-facing e-Commerce platform they developed that is composed of a series of microservices hosted in an existing AKS cluster.",
+    "OverviewUrl": "Overview.html",
+    "ContentVersion": "1.0",
+    "UniqueUriPart": "challenge-azure-kubernetes-service-operations",
+	"Tags": [
+		"Azure Challenge"
+	],
+	"Synonyms": [
+		"Azure Kubernetes Service Challenge",
+        "Azure Kubernetes Service",
+        "AKS",
+        "Containers",
+        "Azure Monitor",
+        "Azure Monitor for containers",
+        "Log Analytics"
+	],
+    "ContentPackage": {
+        "ContentItems": [
+            {
+                "Order": 1,
+                "Title": "Challenge 1: Implementing AKS to meeting customer requirements",
+                "Description": "You customer has an existing AKS deployment with running containers and supporting infrastructure such as MongoDB, Redis, and Azure Container Registry. Over time, their needs have shifted with AKS and they now are ready to adopt the latest features of AKS to better position themselves for security and access to the latest features of AKS.",
+                "Url": "Exercise 1.html",
+                "TimeEstimateMinutes": 45
+            },
+            {
+                "Order": 2,
+                "Title": "Challenge 2: Isolating workloads with multiple node pools",
+                "Description": "With the Fruit Smoothies application deployed and stabilized, Fruit Smashers would like to onboard a new application that allows visitors to their corporate headquarters to leave messages about the favorite part of their visit.",
+                "Url": "Exercise 2.html",
+                "TimeEstimateMinutes": 60
+            },
+            {
+                "Order": 3,
+                "Title": "Challenge 3: Monitoring containerized workloads",
+                "Description": "Now that your applications are up and running on their new infrastructure, it is time to implement a solution for monitoring cluster, node, pod, and container health.",
+                "Url": "Exercise 3.html",
+                "TimeEstimateMinutes": 45
+            }
+        ]
+    }
+}
