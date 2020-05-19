@@ -21,7 +21,7 @@ https://admin.healthbot.microsoft.com/
 * Using the text box at the top of the page search for the following: *disclaimer*  
 * Notice that the page has been filtered to STRING IDs that match the word *disclaimer*  
 ![](images/messagefilter.png)
-* If you look at the third result you will notice a pattern *CDC/messages/disclaimer_msg* Let's figure out when that is called in the Health Bot.
+* If you look at the third result you will notice a pattern *HB/disclaimer_msg* Let's figure out when that is called in the Health Bot.
 * Open a new browser tab and visit  
 ```
 https://admin.healthbot.microsoft.com/
