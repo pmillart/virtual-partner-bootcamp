@@ -1,0 +1,291 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f3f2f1;
+}
+
+.microsoftLogo {
+  padding: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-around;
+  padding: 1rem;
+  border-bottom: 1px solid #cccccc6b;
+}
+
+.headerLogo {
+  margin-right: 1rem;
+  max-width: 32px;
+  width: 32px;
+}
+
+.headerIcon {
+  cursor: pointer;
+  margin-left: auto;
+  text-align: right;
+}
+
+.headerIcon span {
+  display: inherit;
+}
+
+.headerIcon i {
+  color: #3e3e3e;
+  position: relative;
+  top: 7px;
+}
+
+.container {
+  padding: 1rem 1.5rem 2rem 1.5rem;
+  width: 100%;
+}
+
+.teamsButton,
+.teamsButtonInverted {
+  border-radius: 3px;
+  height: 2.25rem;
+  font-size: .875rem;
+  font-weight: 600;
+  padding: 0 1.25rem;
+  text-decoration: none;
+}
+
+.teamsButton {
+  background-color: #6264a7;
+  border: 1px solid hsla(0,0%,100%,.04);
+  box-shadow: 1px 1px 3px 0 rgba(0,0,0,.15);
+}
+
+.teamsButton:hover {
+  background: #464775;
+  border-color: transparent;
+}
+
+.teamsButton:active {
+  background: #33344A;
+  border-color: transparent;
+}
+
+.teamsButtonInverted {
+  border: 1px solid #e3e5e9;
+  background-color: #fff;
+  box-shadow: 1px 1px 3px 0 rgba(0,0,0,.075);
+}
+
+.teamsButtonInverted:hover {
+  background-color: #f3f2f1;
+}
+
+.teamsButtonFullWidth {
+  width: 100%;
+}
+
+.splashImage {
+  max-width: 650px;
+  margin-top: 4.3rem;
+}
+
+.uTextCenter {
+  text-align: center;
+}
+
+div[class*="ms-TextField-wrapper"]:after {
+  border-bottom: 2px solid #6264a7;
+}
+
+.signinHeader {
+  margin-bottom: 2.1rem;
+}
+
+.signinSubHeader {
+  margin-top: 0 !important; /* needs to override Fabric */
+  margin-bottom: 0.5rem; 
+}
+
+/*
+*  New Meeting Styles
+*/
+
+.newMeetingContainer {
+  display: flex;
+  height: calc(100vh - 10vh);
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.newMeetingInput input {
+  border-radius: 3px;
+}
+
+.newMeetingInputIcon i {
+  margin-right: 1.1rem;
+}
+
+div[class*="ms-ComboBox"]::after {
+  border: none; /* override fabric border */
+}
+
+.newMeetingDatePicker {
+  margin-right: 0.5rem;
+}
+
+.newMeetingDatePickerContainer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+.newMeetingDatePickerContainer > i {
+  margin-right: 1rem;
+}
+
+.newMeetingDatePicker i {
+  display: none; /* hides fabric date icon to match design */
+}
+
+.newMeetingComboBox {
+  flex: 0 0 30%;
+}
+
+.newMeetingPicker > div {
+  margin-bottom: 0.8rem;
+}
+
+.newMeetingPickerIcon {
+  transform: rotate(180deg);
+  position: relative;
+  font-size: 1.1rem;
+  left: 15px;
+  top: -8px;
+}
+
+.newMeetingPickerIncrement {
+  position: relative;
+  left: 15px;
+  top: 7px;
+}
+
+@media (min-width: 600px) {
+  .newMeetingPicker {
+    display: flex;
+  }
+
+  .newMeetingComboBox {
+    flex: 1 1 auto;
+    max-width: 100px;
+  }
+
+  .newMeetingPickerIcon {
+    padding: 0 0.5rem;
+    left: auto;
+  }
+}
+
+.newMeetingButtons {
+  display: none;
+}
+
+.newMeetingButtonsMobile {
+  display: block;
+  padding: 0 1.5rem;
+}
+
+@media (min-width: 500px) {
+  .newMeetingButtons {
+    display: block;
+  }
+
+  .newMeetingButtonsMobile {
+    display: none;
+  }
+}
+
+/*
+*  Meeting Card Styles
+*/
+
+.meetingSuccess {
+  align-self: center;
+  display: flex;
+  margin-bottom: 1.5rem;
+  width: 50px;
+}
+
+.teamsLink {
+  color: #6264a7;
+}
+
+.meetingCardContainer {
+  display: flex;
+  box-shadow: 0px 9px 10px 1px #00000014;
+  flex-direction: column;
+  margin-top: 4.3rem;
+  padding: 2rem;
+}
+
+@media (min-width: 600px) {
+  .meetingCardContainer {
+    width: 400px;
+  }
+}
+
+.meetingCardBody {
+  border: 1px solid #cccccc6b;
+  border-radius: 3px;
+  padding: 0 1rem 1.3rem 1rem;
+}
+
+.meetingCardBody > div > span {
+  display: none; /* sigh...have to override injected html */
+}
+
+.meetingCardBody span {
+  font-size: 0.9rem !important; /* override for injected html */
+}
+
+.meetingCardHeader,
+.meetingCardSubHeader {
+  margin-bottom: 1.4rem;
+  text-align: center;
+}
+
+.meetingCardSubHeader {
+  line-height: 1.5;
+  max-width: 400px;
+}
+
+.meetingCardDialInfo,
+.meetingCardUrl {
+  margin-bottom: 1rem;
+  display: block;
+  font-size: 1rem;
+}
+
+.meetingCardConfID {
+  margin-bottom: 1rem;
+}
+
+.copyButton {
+  align-self: flex-end;
+  margin-top: 1.6rem;
+}
+
+/*
+* Spinner styling
+*/
+.spinnerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+div[class*="ms-Spinner-circle"] {
+  border-color: #6264a7 #a7a8c7 #a7a8c7;
+}
+
+.ms-ComboBox-optionsContainerWrapper {
+  max-height: 300px;
+}
