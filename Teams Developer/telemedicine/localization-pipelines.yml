@@ -1,0 +1,32 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- checkout: self
+  persistCredentials: true
+
+- powershell: |
+   git config --global user.email 'sklocsrv@microsoft.com'
+   git config --global user.name 'Skype Localization Fabric Automation'
+
+- task: TouchdownBuildTask@1
+  inputs:
+    environment: 'PRODEXT'
+    teamId: '7037'
+    authType: 'OAuth'
+    authId: $(authId)
+    authKey: $(authKey)
+    relativePathRoot: 'src/localization'
+    resourceFilePath: '**/strings.json'
+    appendRelativeDir: true
+    outputDirectoryRoot: 'src/translations/'
+    cultureMappingType: 'None'
+    gitAction: 'COMMIT'
