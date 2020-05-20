@@ -8,7 +8,28 @@ With the Fruit Smoothies application deployed and stabilized, Fruit Smashers wou
 
 The developers of the guestbook messaging application have identified the `Standard_B1ms` as a good target size for a two-node pool. They feel it meets not only their baseline CPU and memory needs from their testing, but they also fee that the B-series VMs are ideal for their workload as it does not need the full performance of the CPU continuously.
 
-Your challenge is to configure a new node pool with two nodes and deploy the Guestbook application into a dedicated namespace, ensuring that the Guestbook application can be deployed only its dedicated pool members. Keep in mind the existing Fruit Smoothies application is currently in production and should not be impacted by the deployment of this new application and its associated services.
+Your challenge is to configure a new node pool with two nodes and deploy the Guestbook application into a dedicated namespace, ensuring that the Guestbook application can be deployed to only its dedicated pool members. Keep in mind the existing Fruit Smoothies application is currently in production and should not be impacted by the deployment of this new application and its associated services.
+
+### Environment details
+
+The Guestbook application deployment files can be found at <a href="https://github.com/opsgility/lab-support-public/tree/master/akschallenge/guestbook" target="_blank">lab-support-public/akschallenge/guestbook</a>.
+
+The Guestbook is composed of a Redis master, several Redis slaves, and a frontend website where guests can log their messages.
+
+The developers of the Guestbook have provided the following example script for how they are executing deployments locally:
+
+```sh
+BASE_URI="https://raw.githubusercontent.com/opsgility/lab-support-public/master/akschallenge/guestbook/"
+
+kubectl apply -f "${BASE_URI}redis-master-deployment.yaml"
+kubectl apply -f "${BASE_URI}redis-master-service.yaml"
+kubectl apply -f "${BASE_URI}redis-slave-deployment.yaml"
+kubectl apply -f "${BASE_URI}redis-slave-service.yaml"
+kubectl apply -f "${BASE_URI}frontend-deployment.yaml"
+kubectl apply -f "${BASE_URI}frontend-service.yaml"
+
+kubectl get service frontend
+```
 
 ## Success criteria
 

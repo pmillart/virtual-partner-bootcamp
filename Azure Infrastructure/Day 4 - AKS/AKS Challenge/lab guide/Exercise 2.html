@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>LAB GUIDE – includes</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://opsgilitylabs.blob.core.windows.net/lablayout/labstyles.css"></link>
+</head>
+<body>
+<h1 id="challenge-guide">Challenge Guide</h1>
+<h2 id="operationalizing-azure-kubernetes-service">Operationalizing Azure Kubernetes Service</h2>
+<h2 id="challenge-2-isolating-workloads-with-multiple-node-pools">Challenge 2: Isolating workloads with multiple node pools</h2>
+<p>With the Fruit Smoothies application deployed and stabilized, Fruit Smashers would like to onboard a new application that allows visitors to their corporate headquarters to leave messages about the favorite part of their visit. As with the Fruit Smoothies application, Fruit Smashers wants to maintain the isolation of their applications with namespaces. They also recognize that the compute needs of their new application will be far less than their popular ratings app and don’t want to impact the existing configuration.</p>
+<p>The developers of the guestbook messaging application have identified the <code>Standard_B1ms</code> as a good target size for a two-node pool. They feel it meets not only their baseline CPU and memory needs from their testing, but they also fee that the B-series VMs are ideal for their workload as it does not need the full performance of the CPU continuously.</p>
+<p>Your challenge is to configure a new node pool with two nodes and deploy the Guestbook application into a dedicated namespace, ensuring that the Guestbook application can be deployed to only its dedicated pool members. Keep in mind the existing Fruit Smoothies application is currently in production and should not be impacted by the deployment of this new application and its associated services.</p>
+<h3 id="environment-details">Environment details</h3>
+<p>The Guestbook application deployment files can be found at <a href="https://github.com/opsgility/lab-support-public/tree/master/akschallenge/guestbook" target="_blank">lab-support-public/akschallenge/guestbook</a>.</p>
+<p>The Guestbook is composed of a Redis master, several Redis slaves, and a frontend website where guests can log their messages.</p>
+<p>The developers of the Guestbook have provided the following example script for how they are executing deployments locally:</p>
+<pre class="sh"><code>BASE_URI=&quot;https://raw.githubusercontent.com/opsgility/lab-support-public/master/akschallenge/guestbook/&quot;
+
+kubectl apply -f &quot;${BASE_URI}redis-master-deployment.yaml&quot;
+kubectl apply -f &quot;${BASE_URI}redis-master-service.yaml&quot;
+kubectl apply -f &quot;${BASE_URI}redis-slave-deployment.yaml&quot;
+kubectl apply -f &quot;${BASE_URI}redis-slave-service.yaml&quot;
+kubectl apply -f &quot;${BASE_URI}frontend-deployment.yaml&quot;
+kubectl apply -f &quot;${BASE_URI}frontend-service.yaml&quot;
+
+kubectl get service frontend</code></pre>
+<h2 id="success-criteria">Success criteria</h2>
+<p>Explain to your coach:</p>
+<ul>
+<li>How you approached the creation of a new node pool.</li>
+<li>How you ensured that the existing ratings application was available the whole time you were deploying the new application.</li>
+<li>How you determined the size you would use for each VM in the new node pool.</li>
+</ul>
+<h2 id="progressing-to-the-next-challenge">Progressing to the next challenge</h2>
+<p>After you have completed the challenge, click the <strong>Mark complete</strong> button to inform your coach you are ready for review.</p>
+<h2 id="help-resources">Help Resources</h2>
+<ul>
+<li><a href="https://docs.microsoft.com/azure/aks/operator-best-practices-multi-region" target="_blank">Best practices for business continuity and disaster recovery in Azure Kubernetes Service (AKS)</a></li>
+<li><a href="https://docs.microsoft.com/azure/aks/use-multiple-node-pools" target="_blank">Create and manage multiple node pools for a cluster in Azure Kubernetes Service (AKS)</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/" target="_blank">Taints and Tolerations</a></li>
+</ul>
+</body>
+</html>

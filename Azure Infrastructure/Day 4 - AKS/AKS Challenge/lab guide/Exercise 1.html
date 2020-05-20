@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>LAB GUIDE – includes</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://opsgilitylabs.blob.core.windows.net/lablayout/labstyles.css"></link>
+</head>
+<body>
+<h1 id="challenge-guide">Challenge Guide</h1>
+<h2 id="operationalizing-azure-kubernetes-service">Operationalizing Azure Kubernetes Service</h2>
+<h2 id="overview">Overview</h2>
+<p>A new customer, Fruit Smashers, has approached to you take on the management and operations of one or more containerized applications which are hosted in an existing Azure Kubernetes Service (AKS) cluster. Currently, a popular website for rating fruit smoothie flavors - Fruit Smoothies by Fruit Smashers - is deployed in the cluster and a new application will be coming online shortly to allow guests to Fruit Smashers corporate headquarters to leave messages about the favorite part of their visit. While the existing platform and underlying deployment(s) meet the needs of the business, Fruit Smashers plans to grow their online presence significantly as more customers move to online ordering exclusively. They anticipate that growth will be organic and bursty.</p>
+<h2 id="accessing-microsoft-azure">Accessing Microsoft Azure</h2>
+<p>Launch Chrome from the virtual machine desktop and navigate to the URL below. Your Azure Credentials are available by clicking the Cloud Icon at the top of the Lab Player.</p>
+<pre class="sh"><code>https://portal.azure.com</code></pre>
+<h2 id="challenge-1-implementing-aks-to-meeting-customer-requirements">Challenge 1: Implementing AKS to meeting customer requirements</h2>
+<p>You customer has an existing AKS deployment with running containers and supporting infrastructure such as MongoDB, Redis, and Azure Container Registry. Over time, their needs have shifted with AKS and they now are ready to adopt the latest features of AKS to better position themselves for security and access to the latest features of AKS, starting with their Fruit Smoothie ratings application.</p>
+<ul>
+<li>The existing deployment utilizes a single namespace (default) with the existing application and its supporting services deployed. As new applications are onboarded, further isolation will be required.</li>
+<li>Existing developers have access to the <code>default</code> and <code>kube-system</code> namespaces. As new applications are onboarded, each development team will need access to only their resources for deployment and service management.</li>
+</ul>
+<p>They would like to maintain their existing architecture, transitioning the existing application to a dedicated namespace for Fruit Smoothies. For example:</p>
+<figure>
+<img src="images/ratings_architecture.png" alt="" /><figcaption>Ratings architecture in dedicated namespace</figcaption>
+</figure>
+<p>Your initial challenge is to configure the existing application in a dedicated namespace and allow only the <code>Fruit Smashers Smoothers</code> security group access to the namespace.</p>
+<h3 id="environment-details">Environment details</h3>
+<p>The current development team has authored a <a href="https://github.com/opsgility/lab-support-public/blob/master/akschallenge/ratingsapp/deploy.sh" target="_blank">script</a> which they use to assist them in their deployments. The script is responsible for the creation and deployment of:</p>
+<ul>
+<li>A new AKS cluster in a dedicated VNet</li>
+<li>An Azure Container Registry for storing container images for an API and the frontend website</li>
+<li>Deployment of the API and frontend website containers and support services</li>
+</ul>
+<p>Service are deployed using a series of standard Kubernetes YAML definitions:</p>
+<pre class="sh"><code>echo &quot;Deploying ratings-api...&quot;
+kubectl apply \
+    -f ratings-api-deployment.yaml
+
+kubectl get deployment ratings-api
+
+echo &quot;Deploying ratings-api service...&quot;
+kubectl apply \
+    -f ratings-api-service.yaml
+
+echo &quot;Deploying ratings-web...&quot;
+kubectl apply \
+    -f ratings-web-deployment.yaml
+
+echo &quot;Deploying ratings-web service...&quot;
+kubectl apply \
+    -f ratings-web-service.yaml</code></pre>
+<p>The definitions can be found at <a href="https://github.com/opsgility/lab-support-public/tree/master/akschallenge/ratingsapp" target="_blank">lab-support-public/akschallenge/ratingsapp</a>.</p>
+<p>Each of the deployments has a property <code>image:</code> which defines which ACR to pull images from on deployment. The deployment script dynamically updates these values and you should account for this in any new deployments. For example:</p>
+<pre class="sh"><code>image: ACR_NAME.azurecr.io/ratings-api:v1 # IMPORTANT: update with your own repository</code></pre>
+<p>Becomes:</p>
+<pre class="sh"><code>image: acr414134.azurecr.io/ratings-api:v1 # IMPORTANT: update with your own repository</code></pre>
+<h2 id="success-criteria">Success criteria</h2>
+<p>Explain to your coach:</p>
+<ul>
+<li>How you addressed each of these issues and mitigated your customer’s concerns.</li>
+</ul>
+<h2 id="progressing-to-the-next-challenge">Progressing to the next challenge</h2>
+<p>After you have completed the challenge, click the <strong>Mark complete</strong> button to inform your coach you are ready for review.</p>
+<h2 id="help-resources">Help Resources</h2>
+<ul>
+<li><a href="https://docs.microsoft.com/azure/aks/intro-kubernetes" target="_blank">Azure Kubernetes Service (AKS)</a></li>
+<li><a href="https://docs.microsoft.com/azure/sql-database/sql-database-technical-overview" target="_blank">What is the Azure SQL Database service?</a></li>
+</ul>
+</body>
+</html>

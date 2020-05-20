@@ -27,6 +27,50 @@ They would like to maintain their existing architecture, transitioning the exist
 
 Your initial challenge is to configure the existing application in a dedicated namespace and allow only the `Fruit Smashers Smoothers` security group access to the namespace.
 
+### Environment details
+
+The current development team has authored a <a href="https://github.com/opsgility/lab-support-public/blob/master/akschallenge/ratingsapp/deploy.sh" target="_blank">script</a> which they use to assist them in their deployments. The script is responsible for the creation and deployment of:
+
+- A new AKS cluster in a dedicated VNet
+- An Azure Container Registry for storing container images for an API and the frontend website
+- Deployment of the API and frontend website containers and support services
+
+Service are deployed using a series of standard Kubernetes YAML definitions:
+
+```sh
+echo "Deploying ratings-api..."
+kubectl apply \
+    -f ratings-api-deployment.yaml
+
+kubectl get deployment ratings-api
+
+echo "Deploying ratings-api service..."
+kubectl apply \
+    -f ratings-api-service.yaml
+
+echo "Deploying ratings-web..."
+kubectl apply \
+    -f ratings-web-deployment.yaml
+
+echo "Deploying ratings-web service..."
+kubectl apply \
+    -f ratings-web-service.yaml
+```
+
+The definitions can be found at <a href="https://github.com/opsgility/lab-support-public/tree/master/akschallenge/ratingsapp" target="_blank">lab-support-public/akschallenge/ratingsapp</a>.
+
+Each of the deployments has a property `image:` which defines which ACR to pull images from on deployment. The deployment script dynamically updates these values and you should account for this in any new deployments. For example:
+
+```sh
+image: ACR_NAME.azurecr.io/ratings-api:v1 # IMPORTANT: update with your own repository
+```
+
+Becomes:
+
+```sh
+image: acr414134.azurecr.io/ratings-api:v1 # IMPORTANT: update with your own repository
+```
+
 ## Success criteria
 
 Explain to your coach:
