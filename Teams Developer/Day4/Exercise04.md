@@ -10,7 +10,7 @@
 https://admin.healthbot.microsoft.com/
 ```
 
-## Challenge 4: Customizing messages in the Healthcare Bot
+## Challenge 4: Adding Telemedicine Application
 The goal of this exercise is to offer someone the opportunity to create a Telemedicine video-conference call directly from the Health Bot    
 * Scenario Management Landing Page
 ![](images/scenariomgmt2.png)  
@@ -18,29 +18,94 @@ The goal of this exercise is to offer someone the opportunity to create a Teleme
 ![](images/customscenario.png)  
 * Using the text box at the top of the page search for the following: *msg*  
 * Notice that the page has been filtered to STRING IDs that match the word *msg*  
+![](images/msgfilter.png) 
 
-![](images/messagefilter.png)
-* If you look at the third result you will notice a pattern *HB/disclaimer_msg* Let's figure out when that is called in the Health Bot.
-* Open a new browser tab and visit  
-```
-https://admin.healthbot.microsoft.com/
+* If you look at the seventh result you will notice a pattern *CDC/messages/msg1* This message currently has the following message  
 ```  
-* Click the second link for COVID19 Triage. The description will say "The scenario is a wrapper for the CORE..." 
-* Ensure that you are in the Designer view and use the scroll bars until the flow looks similar the following graphic. Then close the minimap by clicking on it one time in the menu.  
- ![](images/disclaimerview.png)  
-* Double-click on the first green icon that says Disclaimer to open the properties of the prompt message.    
-![](images/DisclaimerMsg.png)
-* Notice the first text box under the heading Display Text. It has the value *scenario.messages.disclaimer_msg* If you switch back to the previous tab you can see that the first value ends with *disclaimer_msg*
-* Now switch tabs to the Disclaimer prompt again. Notice the third option is *Variable Data Type*: with a value of *scenario.responses.disclaimer_response* and *Show Choices* as *button*  
-** So this prompt combines two pieces. The first is to display the *disclaimer_msg* and the second is to display Choices from *disclaimer_response* as buttons.  
-* In the upper left-hand corner click on the *Run* button. This will start the interactive Designer and start the chat in the upper right-hand corner. You will notice the text includes the words *ADD CUSTOM DISCLAIMER MESSAGE HERE* and the two buttons also match the previous tab. Click on the Exit button to the left of the web chat. 
-* Switch back to the previous tab and let's make an update. In the disclaimer_msg replace the text **ADD CUSTOM DISCLAIMER HERE** with **THIS IS MY CUSTOM TEXT**  
-* After making the change switch back to the Scenarios and select the second COVID19 scenario again.  
-* Click the Run button again and verify your changes are visible.  ![](images/customtext.png)
+**Sounds like you are feeling ok.**  
+
+Learn more about COVID-19 and what you can do to stay safe on the [CDC website](https://www.cdc.gov/coronavirus/2019-ncov/index.html).
+```
+* The text is utilizing a format called markdown. For more information about markdown formatting please visit this link
+```
+https://www.markdownguide.org/cheat-sheet/
+```
+* According to the guide the first line is a bold statement followed by some text and some links.  
+![](images/feelingok.png)
+* To view this message yourself you can Run the COVID19 Triage Wrapper scenario using the following steps. I would suggest opening another tab so you don't loose the message we are going to modify. There are many paths in the COVID19 path that can potentially lead to the same result message. This is just a reproducible one.  
+```
+"This is my custom text"
+  - Click the I agree button
+"Where are you located"
+  - Click the United States button
+"Where in the United States are you located?"
+  - Choose Texas
+  - Click the Submit button
+"Are you ill, or caring for someone who is ill?"
+  - Click the No button
+"Are you answering for yourself or someone else?"
+  - Click Myself
+"What is your age?"
+  - Choose 60-64
+"In the last two weeks, did you care for or have close contact with someone diagnosed with COVID-19?"
+  - Click the No button
+  
+```
+* After you follow this path you might notice there are three messages displayed. We want to add a fourth message.
+![](images/3messages.png)
+
+* The changes we are going to make are in the COVID 19 Triage Core. So open that scenario and using the minimapper navigate to near the center of the flow on the left side.  
+![](images/minimap.png)  
+* We will be adding a message to the section on the right
+![](images/right-secion.png)   
+* Navigate back to the Custom Scenarion Localization tab and copy the STRING ID for *CDC/messages/msg1*. We do not want to conflict with any other messages so ours will be *CDC/messages/msg101*
+* Click the Add new string button at the top  
+![](images/addnewstring.png)  
+* Enter *CDC/messages/msg101* in the first text box and then in the second text box we are going to use some markdown. Use the following 
+```
+If you would be interested in scheduling a Telemedicine video-conference call please click the link below  
+
+[Telemedicine](https://localhost:3000)
+```  
+![](images/clicksave.png)
+* Click the Save button at the top of the page
+* Switch tabs back open the COVID19 Triage Core in Designer mode
+* Using the minimapper navigate to the top section
+![](images/minimapper2.png)  
+* Double click on the Action icon called *DICT*  
+* We need to map our new value inside this JavaScript
+* Scroll down to the bottom of the expression and look for the line that contains *msg18*
+* Copy that line and paste it below the *msg18* line. Change it to the following  
+```
+msg101: customLocalizedStrings["CDC/messages/msg101"],
+```
+* The final result will look like the following
+![](images/101message.png)  
+* Click Ok to close the Action.
+* Now navigate back to the center left of the flow
+![](images/minimap.png) 
+* Drag a Statement below *MSG T0* and enter the following values
+![](images/statement.png)
+* Now click the pencil icon next to the word Statement
+* Change it to Telemedicine
+* Click OK
+* Current result looks like the following  
+![](images/telemed1.png) 
+* Click the bottom small circle from *MSG T0* Statement and drag it to the top small circle on the new *Telemedicine* Statement
+* Final Result  
+![](images/finalresult.png)
+* Click Save in the upper left-hand corner
+* Now click Exit and open the COVID19 Triage Wrapper
+* Now click Run and follow the previous steps to see the new message added to the result.  
+![](images/4messages.png)
+
+
+
+
 
 ## Success criteria
 
-* You have successfully modified the Healthcare Bot to display a custom message  
+* You have successfully modified the Healthcare Bot to display a custom Statement
 
 ## Progressing to the Next Challenge
 
