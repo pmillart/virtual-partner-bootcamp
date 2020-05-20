@@ -1,35 +1,53 @@
-using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace ECommerce.APIs
 {
     public static class Store
     {
         [FunctionName("Store")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
+        public static async Task<List<string>> RunOrchestrator(
+            [OrchestrationTrigger] IDurableOrchestrationContext context)
+        {
+            var outputs = new List<string>();
+
+            // Replace "hello" with the name of your Durable Activity Function.
+            outputs.Add(await context.CallActivityAsync<string>("Store_Hello", "Tokyo"));
+            outputs.Add(await context.CallActivityAsync<string>("Store_Hello", "Seattle"));
+            outputs.Add(await context.CallActivityAsync<string>("Store_Hello", "London"));
+
+            // returns ["Hello Tokyo!", "Hello Seattle!", "Hello London!"]
+            return outputs;
+        }
+
+        [FunctionName("Store_Hello")]
+        public static string SayHello([ActivityTrigger] string name, ILogger log)
+        {
+            log.LogInformation($"Saying hello to {name}.");
+            return $"Hello {name}!";
+        }
+
+        [FunctionName("store")]
+        public static async Task<HttpResponseMessage> HttpStart(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestMessage req,
+            [DurableClient] IDurableOrchestrationClient starter,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            // Function input comes from the request content.
+            string instanceId = await starter.StartNewAsync("Store", null);
+            
+            log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
 
-            string name = req.Query["name"];
+            var response = await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(req, instanceId);
+            log.LogInformation(await response.Content.ReadAsStringAsync());
 
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            name = name ?? data?.name;
-
-            string responseMessage = string.IsNullOrEmpty(name)
-                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"Hello, {name}. This HTTP triggered function executed successfully.";
-
-            return new OkObjectResult(responseMessage);
+            return starter.CreateCheckStatusResponse(req, instanceId);
         }
     }
 }
