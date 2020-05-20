@@ -56,7 +56,7 @@ https://www.markdownguide.org/cheat-sheet/
 
 * The changes we are going to make are in the COVID 19 Triage Core. So open that scenario and using the minimapper navigate to near the center of the flow on the left side.  
 ![](images/minimap.png)  
-* We will be adding a message to the section on the right
+* We will be adding a message to the section on the right  
 ![](images/right-secion.png)   
 * Navigate back to the Custom Scenarion Localization tab and copy the STRING ID for *CDC/messages/msg1*. We do not want to conflict with any other messages so ours will be *CDC/messages/msg101*
 * Click the Add new string button at the top  
@@ -70,7 +70,7 @@ If you would be interested in scheduling a Telemedicine video-conference call pl
 ![](images/clicksave.png)
 * Click the Save button at the top of the page
 * Switch tabs back open the COVID19 Triage Core in Designer mode
-* Using the minimapper navigate to the top section
+* Using the minimapper navigate to the top section  
 ![](images/minimapper2.png)  
 * Double click on the Action icon called *DICT*  
 * We need to map our new value inside this JavaScript
