@@ -1,0 +1,2 @@
+You have recently successfully engaged with Contoso Coffee Ltd., a popular supplier of goods for baristas and showcased them a proof-of-concept solution which would both migrate them to the cloud and modernize their backend.
+Nonetheless, before getting started it's of paramount importance to ensure proper security policies are in place to prevent malitious users from taking Contoso Coffee's application down.
