@@ -1,8 +1,10 @@
 # Keep In Touch App Challenge Guide
 
-## Challenge 5: Validating access
+## Challenge 5: Validating Graph API Access
 
-In this challenge, you will add some skills to the two users that you interacted with in the Icebreaker app. In an incognito or InPrivate browser session visit
+In this challenge, you will create some basic queries to validate your application has the correct permissions to use the Graph API.
+
+In an incognito or InPrivate browser session visit
 <br>
 ```
 https://developer.microsoft.com/en-us/graph/graph-explorer

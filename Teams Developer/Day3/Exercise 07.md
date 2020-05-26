@@ -1,6 +1,8 @@
 # Keep In Touch App Challenge Guide
 
-## Challenge 7: Integrating Teams and Logic App
+## Challenge 7: Integrating Teams and Logic Apps
+
+In this challenge, you will create a new Teams channel that will integrate with your Logic App.
 
 * Create a new Team in Micosoft Teams called **Professional Skills.**
 ![](images/build%20a%20team.png)

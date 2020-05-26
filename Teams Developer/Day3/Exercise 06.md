@@ -1,6 +1,8 @@
 # Keep In Touch App Challenge Guide
 
-## Challenge 6: Integrating into Logic App
+## Challenge 6: Retrieve Users with Azure Logic Apps
+
+In this challenge, you will create two Azure Logic Apps for retrieving users from your Teams channel and storing them in Cosmos DB.
 
 * Now create a new Logic App for retrieving all the users and storing them in Cosmos. 
 * The **HTTP** step will have the following attributes:

@@ -1,8 +1,10 @@
 # Keep In Touch App Challenge Guide
 
-## Challenge 4: Setting up permissions
+## Challenge 4: Configure App Permissions
 
-In this challenge, you will add some skills to the two users that you interacted with in the Icebreaker app. In an incognito or InPrivate browser session visit
+In this challenge, you will configure Azure AD to allow your app to access to the Graph API. 
+
+In an incognito or InPrivate browser session visit
 <br>
 ```
 https://portal.azure.com
