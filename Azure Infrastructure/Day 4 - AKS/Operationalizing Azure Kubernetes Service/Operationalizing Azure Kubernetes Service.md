@@ -36,25 +36,33 @@ az aks create \
 
 ## Demo: Managing cluster identity lifecycle
 
-```sh
-SP_ID=$(az aks show --resource-group clusterRG --name aksCluster --query servicePrincipalProfile.clientId -o tsv)
-```
+1. Get the current SP assigned to the cluster:
 
-```sh
-echo "Get credential endDate..."
-SP_END_DATE=$(az ad sp credential list --id $SP_ID --query "[].endDate" -o tsv)
-echo "endDate: $SP_END_DATE"
-```
+    ```sh
+    SP_ID=$(az aks show --resource-group clusterRG --name aksCluster --query servicePrincipalProfile.clientId -o tsv)
+    ```
 
-```sh
-SP_SECRET=$(az ad sp credential reset --name $SP_ID --query password -o tsv)
-```
+2. Get the end date for the credential:
 
-```sh
-az aks update-credentials \
-    --resource-group clusterRG \
-    --name aksCluster \
-    --reset-service-principal \
-    --service-principal $SP_ID \
-    --client-secret $SP_SECRET
-```
+    ```sh
+    echo "Get credential endDate..."
+    SP_END_DATE=$(az ad sp credential list --id $SP_ID --query "[].endDate" -o tsv)
+    echo "endDate: $SP_END_DATE"
+    ```
+
+3. Get the secret after a reset:
+
+    ```sh
+    SP_SECRET=$(az ad sp credential reset --name $SP_ID --query password -o tsv)
+    ```
+
+4. Update the cluster (this takes a few minutes)"
+
+    ```sh
+    az aks update-credentials \
+        --resource-group clusterRG \
+        --name aksCluster \
+        --reset-service-principal \
+        --service-principal $SP_ID \
+        --client-secret $SP_SECRET
+    ```
