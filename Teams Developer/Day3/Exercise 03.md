@@ -1,6 +1,6 @@
 # Keep In Touch App Challenge Guide
 
-## Challenge 3: Extend the Icebreaker App
+## Challenge 3: Adding a container
 
 In this challenge, you will add some skills to the two users that you interacted with in the Icebreaker app. In an incognito or InPrivate browser session visit
 <br>
