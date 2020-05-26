@@ -38,13 +38,19 @@ az aks create \
 
 ```sh
 SP_ID=$(az aks show --resource-group clusterRG --name aksCluster --query servicePrincipalProfile.clientId -o tsv)
+```
 
+```sh
 echo "Get credential endDate..."
 SP_END_DATE=$(az ad sp credential list --id $SP_ID --query "[].endDate" -o tsv)
 echo "endDate: $SP_END_DATE"
+```
 
+```sh
 SP_SECRET=$(az ad sp credential reset --name $SP_ID --query password -o tsv)
+```
 
+```sh
 az aks update-credentials \
     --resource-group clusterRG \
     --name aksCluster \
