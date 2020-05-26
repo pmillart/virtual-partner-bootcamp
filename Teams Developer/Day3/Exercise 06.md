@@ -1,6 +1,6 @@
 # Keep In Touch App Challenge Guide
 
-## Challenge 6: Extend the Icebreaker App
+## Challenge 6: Integrating into Logic App
 
 * Now create a new Logic App for retrieving all the users and storing them in Cosmos. 
 * The **HTTP** step will have the following attributes:
