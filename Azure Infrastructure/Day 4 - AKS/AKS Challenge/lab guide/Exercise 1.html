@@ -40,7 +40,7 @@
 <figure>
 <img src="images/ratings_architecture.png" alt="" /><figcaption>Ratings architecture in dedicated namespace</figcaption>
 </figure>
-<p>Your initial challenge is to configure the existing application in a dedicated namespace and allow only the <code>Fruit Smashers Smoothers</code> security group access to the namespace.</p>
+<p>Your initial challenge is to configure the existing application in a dedicated namespace and allow only the <strong>Fruit Smashers Smooth Devs</strong> security group access to the namespace.</p>
 <h3 id="environment-details">Environment details</h3>
 <p>The current development team has authored a <a href="https://github.com/opsgility/lab-support-public/blob/master/akschallenge/ratingsapp/deploy.sh" target="_blank">script</a> which they use to assist them in their deployments. The script is responsible for the creation and deployment of:</p>
 <ul>
@@ -69,6 +69,14 @@ kubectl apply \
 <p>The definitions can be found at <a href="https://github.com/opsgility/lab-support-public/tree/master/akschallenge/ratingsapp" target="_blank">lab-support-public/akschallenge/ratingsapp</a>.</p>
 <p>Each of the deployments has a property <code>image:</code> which defines which ACR to pull images from on deployment. The deployment script dynamically updates these values and you should account for this in any new deployments. For example:</p>
 <pre class="sh"><code>image: ACR_NAME.azurecr.io/ratings-api:v1 # IMPORTANT: update with your own repository</code></pre>
+<p>To locate the IP address of the deployed application, you can use a script similar to the following:</p>
+<pre class="sh"><code>external_ip=&quot;&quot;
+while [ -z $external_ip ]; do
+  echo &quot;Waiting for endpoint...&quot;
+  external_ip=$(kubectl get svc &quot;ratings-web&quot; --template=&quot;{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}&quot;)
+  [ -z &quot;$external_ip&quot; ] &amp;&amp; sleep 10
+done
+echo &quot;Endpoint ready: ${external_ip}&quot;</code></pre>
 <p>Becomes:</p>
 <pre class="sh"><code>image: acr414134.azurecr.io/ratings-api:v1 # IMPORTANT: update with your own repository</code></pre>
 <h2 id="success-criteria">Success criteria</h2>

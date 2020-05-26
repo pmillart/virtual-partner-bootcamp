@@ -8,7 +8,7 @@ With the Fruit Smoothies application deployed and stabilized, Fruit Smashers wou
 
 The developers of the guestbook messaging application have identified the `Standard_B1ms` as a good target size for a two-node pool. They feel it meets not only their baseline CPU and memory needs from their testing, but they also fee that the B-series VMs are ideal for their workload as it does not need the full performance of the CPU continuously.
 
-Your challenge is to configure a new node pool with two nodes and deploy the Guestbook application into a dedicated namespace, ensuring that the Guestbook application can be deployed to only its dedicated pool members. Keep in mind the existing Fruit Smoothies application is currently in production and should not be impacted by the deployment of this new application and its associated services.
+Your challenge is to configure a new node pool with two nodes and deploy the Guestbook application into a dedicated namespace, ensuring that the Guestbook application can be deployed to only its dedicated pool members. Keep in mind the existing Fruit Smoothies application is currently in production and should not be impacted by the deployment of this new application and its associated services. Only members of the **Fruit Smashers Better Devs** security group have access to the namespace.
 
 ### Environment details
 

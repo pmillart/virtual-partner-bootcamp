@@ -1,6 +1,6 @@
 {
     "Title": "Azure Challenge - Azure Kubernetes Service (AKS) Operations",
-    "Description": "One of your largest customers, Contoso Commerce, has approached you about taking on operations surrounding an existing customer-facing e-Commerce platform they developed that is composed of a series of microservices hosted in an existing AKS cluster.",
+    "Description": "A new customer, Fruit Smashers, has approached to you take on the management and operations of one or more containerized applications which are hosted in an existing Azure Kubernetes Service (AKS) cluster.",
     "OverviewUrl": "Overview.html",
     "ContentVersion": "1.0",
     "UniqueUriPart": "challenge-azure-kubernetes-service-operations",

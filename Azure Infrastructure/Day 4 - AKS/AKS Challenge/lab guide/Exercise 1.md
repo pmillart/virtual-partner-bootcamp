@@ -25,7 +25,7 @@ They would like to maintain their existing architecture, transitioning the exist
 
 ![Ratings architecture in dedicated namespace](images/ratings_architecture.png)
 
-Your initial challenge is to configure the existing application in a dedicated namespace and allow only the `Fruit Smashers Smoothers` security group access to the namespace.
+Your initial challenge is to configure the existing application in a dedicated namespace and allow only the **Fruit Smashers Smooth Devs** security group access to the namespace.
 
 ### Environment details
 
@@ -63,6 +63,18 @@ Each of the deployments has a property `image:` which defines which ACR to pull 
 
 ```sh
 image: ACR_NAME.azurecr.io/ratings-api:v1 # IMPORTANT: update with your own repository
+```
+
+To locate the IP address of the deployed application, you can use a script similar to the following:
+
+```sh
+external_ip=""
+while [ -z $external_ip ]; do
+  echo "Waiting for endpoint..."
+  external_ip=$(kubectl get svc "ratings-web" --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}")
+  [ -z "$external_ip" ] && sleep 10
+done
+echo "Endpoint ready: ${external_ip}"
 ```
 
 Becomes:
