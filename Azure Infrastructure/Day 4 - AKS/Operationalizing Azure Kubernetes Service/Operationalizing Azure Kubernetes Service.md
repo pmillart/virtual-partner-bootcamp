@@ -6,6 +6,8 @@
   - [Create the server component](#create-the-server-component)
   - [Create the client component](#create-the-client-component)
   - [Create the cluster](#create-the-cluster)
+  - [AAD RBAC](#aad-rbac)
+  - [Access the cluster with AAD](#access-the-cluster-with-aad)
 
 ## Prerequisites
 
@@ -178,10 +180,65 @@ az aks create \
     az aks create \
         --resource-group clusterAADRG \
         --name $aksname \
-        --node-count 3 \
         --generate-ssh-keys \
         --aad-server-app-id $serverAppId \
         --aad-server-app-secret $serverAppSecret \
         --aad-client-app-id $clientAppId \
         --aad-tenant-id $tenantId
     ```
+
+### AAD RBAC
+
+1. Get the admin creds:
+
+    ```sh
+    az aks get-credentials --resource-group clusterAADRG --name $aksname --admin
+    ```
+
+2. Before an Azure Active Directory account can be used with the AKS cluster, a role binding or cluster role binding needs to be created. Roles define the permissions to grant, and bindings apply them to desired users.
+
+   ```sh
+   CURRENT_USER_UPN=$(az ad signed-in-user show --query userPrincipalName -o tsv)
+   echo "Current user: $CURRENT_USER_UPN"
+   ```
+
+3. Create the a file called `azure-basic-ad-binding.yaml` and paste the following:
+
+    ```yaml
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    metadata:
+      name: contoso-cluster-admins
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: cluster-admin
+    subjects:
+    - apiGroup: rbac.authorization.k8s.io
+      kind: User
+      name: userPrincipalName_or_objectId
+    ```
+
+4. Apply the manifest:
+
+    ```sh
+    echo "Update userPrincipalName_or_objectId in azure-basic-ad-binding.yaml..."
+    sed -i "s/userPrincipalName_or_objectId/${CURRENT_USER_UPN}/g" azure-basic-ad-binding.yaml
+    kubectl apply -f basic-azure-ad-binding.yaml
+    ```
+
+### Access the cluster with AAD
+
+1. Get the credentials
+
+    ```sh
+    az aks get-credentials --resource-group myResourceGroup --name $aksname --overwrite-existing
+    ```
+
+2. Fire off kubectl so we get a login prompt:
+
+    ```sh
+    kubectl get nodes
+    ```
+
+    The authentication token received for kubectl is cached. You are only reprompted to sign in when the token has expired or the Kubernetes config file is re-created.
