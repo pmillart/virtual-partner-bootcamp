@@ -1,6 +1,6 @@
 # Keep In Touch App Challenge Guide
 
-## Challenge 5: Extend the Icebreaker App
+## Challenge 5: Validating access
 
 In this challenge, you will add some skills to the two users that you interacted with in the Icebreaker app. In an incognito or InPrivate browser session visit
 <br>
