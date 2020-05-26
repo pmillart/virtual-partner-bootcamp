@@ -1,6 +1,6 @@
 # Keep In Touch App Challenge Guide
 
-## Challenge 7: Extend the Icebreaker App
+## Challenge 7: Integrating Teams and Logic App
 
 * Create a new Team in Micosoft Teams called **Professional Skills.**
 ![](images/build%20a%20team.png)
