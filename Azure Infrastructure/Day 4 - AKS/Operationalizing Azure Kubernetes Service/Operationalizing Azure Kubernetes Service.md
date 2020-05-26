@@ -1,17 +1,18 @@
 # Demo guide <!-- omit in toc -->
 
 - [Prerequisites](#prerequisites)
+  - [Cluster for SP Reset](#cluster-for-sp-reset)
+  - [Cluster for AAD](#cluster-for-aad)
 - [Demo: Managing cluster identity lifecycle](#demo-managing-cluster-identity-lifecycle)
 - [Demo: Creating Azure AD-enabled cluster and assigning permissions](#demo-creating-azure-ad-enabled-cluster-and-assigning-permissions)
-  - [Create the server component](#create-the-server-component)
-  - [Create the client component](#create-the-client-component)
-  - [Create the cluster](#create-the-cluster)
   - [AAD RBAC](#aad-rbac)
   - [Access the cluster with AAD](#access-the-cluster-with-aad)
 
 ## Prerequisites
 
 Pre-stage your environment with the following resource groups and resources.
+
+### Cluster for SP Reset
 
 ```sh
 az group create -l eastus -n clusterResetRG
@@ -38,6 +39,63 @@ az aks create \
     --name aksCluster \
     --service-principal "${SP_ID}" \
     --client-secret "${CLIENT_SECRET}"
+```
+
+### Cluster for AAD
+
+```sh
+aksname="aksAADCluster"
+
+serverAppId=$(az ad app create \
+    --display-name "${aksname}Server" \
+    --identifier-uris "https://${aksname}Server" \
+    --query appId -o tsv)
+
+az ad app update --id $serverAppId --set groupMembershipClaims=All
+
+az ad sp create --id $serverAppId
+
+serverAppSecret=$(az ad sp credential reset \
+    --name $serverAppId \
+    --credential-description "AKSPassword" \
+    --query password -o tsv)
+
+az ad app permission add \
+    --id $serverAppId \
+    --api 00000003-0000-0000-c000-000000000000 \
+    --api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope 06da0dbc-49e2-44d2-8312-53f166ab848a=Scope 7ab1d382-f21e-4acd-a863-ba3e13f7da61=Role
+
+az ad app permission grant --id $serverAppId \
+    --api 00000003-0000-0000-c000-000000000000
+az ad app permission admin-consent --id $serverAppId
+
+clientAppId=$(az ad app create \
+    --display-name "${aksname}Client" \
+    --native-app \
+    --reply-urls "https://${aksname}Client" \
+    --query appId -o tsv)
+
+az ad sp create --id $clientAppId
+
+oAuthPermissionId=$(az ad app show --id $serverAppId \
+    --query "oauth2Permissions[0].id" -o tsv)
+
+az ad app permission add --id $clientAppId --api $serverAppId \
+    --api-permissions ${oAuthPermissionId}=Scope
+az ad app permission grant --id $clientAppId --api $serverAppId
+
+az group create --name clusterAADRG --location eastus
+
+tenantId=$(az account show --query tenantId -o tsv)
+
+az aks create \
+    --resource-group clusterAADRG \
+    --name $aksname \
+    --generate-ssh-keys \
+    --aad-server-app-id $serverAppId \
+    --aad-server-app-secret $serverAppSecret \
+    --aad-client-app-id $clientAppId \
+    --aad-tenant-id $tenantId
 ```
 
 ## Demo: Managing cluster identity lifecycle
@@ -77,116 +135,6 @@ az aks create \
 
 *Execute this demo locally. There are some commands which fail in Cloud Shell!*
 
-### Create the server component
-
-1. Set vars:
-
-    ```sh
-    aksname="aksAADCluster"
-    ```
-
-2. Create the Azure AD application
-
-    ```sh
-    serverAppId=$(az ad app create \
-        --display-name "${aksname}Server" \
-        --identifier-uris "https://${aksname}Server" \
-        --query appId -o tsv)
-    ```
-
-3. Update the application group membership claims
-
-    ```sh
-    az ad app update --id $serverAppId --set groupMembershipClaims=All
-    ```
-
-4. Create a service principal for the Azure AD application
-
-    ```sh
-    az ad sp create --id $serverAppId
-    ```
-
-5. Get the service principal secret
-
-    ```sh
-    serverAppSecret=$(az ad sp credential reset \
-        --name $serverAppId \
-        --credential-description "AKSPassword" \
-        --query password -o tsv)
-    ```
-
-6. Assign permissions Read directory data and Sign in and read user profile to app
-
-    ```sh
-    az ad app permission add \
-        --id $serverAppId \
-        --api 00000003-0000-0000-c000-000000000000 \
-        --api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope 06da0dbc-49e2-44d2-8312-53f166ab848a=Scope 7ab1d382-f21e-4acd-a863-ba3e13f7da61=Role
-    ```
-
-7. Grant permissions to app (Note this fails if run from Cloud Shell!)
-
-    ```sh
-    az ad app permission grant --id $serverAppId \
-        --api 00000003-0000-0000-c000-000000000000
-    az ad app permission admin-consent --id $serverAppId
-    ```
-
-### Create the client component 
-
-1. Create the client Azure AD app.
-
-    ```sh
-    clientAppId=$(az ad app create \
-        --display-name "${aksname}Client" \
-        --native-app \
-        --reply-urls "https://${aksname}Client" \
-        --query appId -o tsv)
-    ```
-
-2. Create sp
-
-    ```sh
-    az ad sp create --id $clientAppId
-    ```
-
-3. Get the oAuth2 id for the app
-
-    ```sh
-    oAuthPermissionId=$(az ad app show --id $serverAppId \
-        --query "oauth2Permissions[0].id" -o tsv)
-    ```
-
-4. Add permissions for apps to oAuth2 flow
-
-    ```sh
-    az ad app permission add --id $clientAppId --api $serverAppId \
-        --api-permissions ${oAuthPermissionId}=Scope
-    az ad app permission grant --id $clientAppId --api $serverAppId
-    ```
-
-### Create the cluster
-
-1. Create a resource group and retreive the tenant ID.
-
-    ```sh
-    az group create --name clusterAADRG --location eastus
-    tenantId=$(az account show --query tenantId -o tsv)
-    ```
-
-2. Create the cluster:
-
-    ```sh
-    az aks create \
-        --resource-group clusterAADRG \
-        --name $aksname \
-        --generate-ssh-keys \
-        --aad-server-app-id $serverAppId \
-        --aad-server-app-secret $serverAppSecret \
-        --aad-client-app-id $clientAppId \
-        --aad-tenant-id $tenantId
-    ```
-
 ### AAD RBAC
 
 1. Get the admin creds:
@@ -199,7 +147,9 @@ az aks create \
 
    ```sh
    CURRENT_USER_UPN=$(az ad signed-in-user show --query userPrincipalName -o tsv)
+   CURRENT_USER_OBJECT_ID=$(az ad signed-in-user show --query objectId -o tsv)
    echo "Current user: $CURRENT_USER_UPN"
+   echo "Current user object id: $CURRENT_USER_OBJECT_ID"
    ```
 
 3. Create the a file called `azure-basic-ad-binding.yaml` and paste the following:
@@ -219,12 +169,19 @@ az aks create \
       name: userPrincipalName_or_objectId
     ```
 
+    Or download and show with:
+
+    ```sh
+    wget https://raw.githubusercontent.com/opsgility/virtual-partner-bootcamp/master/Azure%20Infrastructure/Day%204%20-%20AKS/Operationalizing%20Azure%20Kubernetes%20Service/azure-basic-ad-binding.yaml
+    cat azure-basic-ad-binding.yaml
+    ```
+
 4. Apply the manifest:
 
     ```sh
     echo "Update userPrincipalName_or_objectId in azure-basic-ad-binding.yaml..."
-    sed -i "s/userPrincipalName_or_objectId/${CURRENT_USER_UPN}/g" azure-basic-ad-binding.yaml
-    kubectl apply -f basic-azure-ad-binding.yaml
+    if [[ $CURRENT_USER_UPN == *"EXT"* ]]; then sed -i "s/userPrincipalName_or_objectId/${CURRENT_USER_OBJECT_ID}/g" azure-basic-ad-binding.yaml; else sed -i "s/userPrincipalName_or_objectId/${CURRENT_USER_UPN}/g" azure-basic-ad-binding.yaml; fi
+    kubectl apply -f azure-basic-ad-binding.yaml
     ```
 
 ### Access the cluster with AAD
@@ -232,7 +189,7 @@ az aks create \
 1. Get the credentials
 
     ```sh
-    az aks get-credentials --resource-group myResourceGroup --name $aksname --overwrite-existing
+    az aks get-credentials --resource-group clusterAADRG --name $aksname --overwrite-existing
     ```
 
 2. Fire off kubectl so we get a login prompt:
