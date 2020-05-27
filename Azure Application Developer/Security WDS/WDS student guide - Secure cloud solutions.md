@@ -31,9 +31,9 @@ Microsoft and the trademarks listed at <https://www.microsoft.com/legal/intellec
   - [Step 1: Review the customer case study](#step-1-review-the-customer-case-study)
     - [Customer situation](#customer-situation)
   - [Customer Requirements](#customer-requirements)
-    - [Proide Unified Identity Provisioning, Management, and Login](#proide-unified-identity-provisioning-management-and-login)
-    - [Utilize Approrpiate Configuration and Access Control Using Identity Roles](#utilize-approrpiate-configuration-and-access-control-using-identity-roles)
-    - [Ensure Data encryption - AT ALL TIMES (at rest and in motion)](#ensure-data-encryption---at-all-times-at-rest-and-in-motion)
+    - [Provide Unified Identity Provisioning, Management, and Login](#provide-unified-identity-provisioning-management-and-login)
+    - [Utilize Approrpriate Configuration and Access Control Using Identity Roles](#utilize-approrpriate-configuration-and-access-control-using-identity-roles)
+    - [Ensure Data Encryption - AT ALL TIMES (at rest and in motion)](#ensure-data-encryption---at-all-times-at-rest-and-in-motion)
     - [Provide Robust Application Security](#provide-robust-application-security)
   - [Requirement Summary](#requirement-summary)
     - [Customer objections](#customer-objections)
@@ -113,7 +113,7 @@ The following requirements are a result of over a year of hard work assessing Co
 
 Fulfiliing these requirements using robust, repeatable capabilities is essential to Contoso Solar's continued growth and success.   Failure in any one of these areas can jeaopardize the firm's ability to maintain their current level of compliance    
 
-### Proide Unified Identity Provisioning, Management, and Login
+### Provide Unified Identity Provisioning, Management, and Login
 As per use cases above, there are three valid authentication scenarios:  
 
 **B2B** - DIY Retail Consumers should be able to use the ecommerce purchase path to purchase solar components with an anonymous cart purchase path.   Or they can create a persistent account with Contoso Solar, using an email as username or using a social login from a valid Identity Provider, and save payment methods and view order status and order history along with sharing other social details if they desire.   This method gives them access to pre- and post- sales technical support as well as event and blog content.  
@@ -122,10 +122,10 @@ As per use cases above, there are three valid authentication scenarios:
 
 **OPS** - Existing and New employees should be able to login with thier assigned Active Directory Domain Login and, optionally may require multi-factor authorization (MFA).   Once authenticated the user will experience single sign-on (SSO) behavior across enterprise applications and endpoints until they fully log out.
 
-### Utilize Approrpiate Configuration and Access Control Using Identity Roles
+### Utilize Approrpriate Configuration and Access Control Using Identity Roles
 As per Contoso Solar's Infosec and Data Handling Policies, there is an active Segregation of Duties Matrix based on Employee Role.  Therefore, employees should have access only to the information they need to perform their duties.  This requirement implies use of Role-based Access Control (RBAC) within the enterprise.   
 
-### Ensure Data encryption - AT ALL TIMES (at rest and in motion)
+### Ensure Data Encryption - AT ALL TIMES (at rest and in motion)
 As Per Contoso Solar's Infosec and Data Handling Policies, data will be encrypted throughout the application stack, regardless of location and status and this includes during application syncronization and data upload/download.  
 
 Example data classification of Contoso Solar secure data: 
