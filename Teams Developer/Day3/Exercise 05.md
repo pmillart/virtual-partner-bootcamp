@@ -28,3 +28,8 @@ You should see one user with their respective responsibilities & skills listed.
 * <span class="colour" style="color: rgb(36, 41, 46);">You have written basic queries for Graph API and validated that you have allowed the appropriate access.</span>
 
 ## Progressing to the next challenge
+
+## Resources
+```
+https://docs.microsoft.com/en-us/graph/overview
+```
