@@ -7,6 +7,7 @@
 - [Demo: Creating Azure AD-enabled cluster and assigning permissions](#demo-creating-azure-ad-enabled-cluster-and-assigning-permissions)
   - [AAD RBAC](#aad-rbac)
   - [Access the cluster with AAD](#access-the-cluster-with-aad)
+- [Demo: Cluster autoscaling in multiple node pools](#demo-cluster-autoscaling-in-multiple-node-pools)
 
 ## Prerequisites
 
@@ -199,3 +200,7 @@ az aks create \
     ```
 
     The authentication token received for kubectl is cached. You are only reprompted to sign in when the token has expired or the Kubernetes config file is re-created.
+
+## Demo: Cluster autoscaling in multiple node pools
+
+*Use the same cluster created in the first demo: [Cluster for SP Reset](#cluster-for-sp-reset)*
