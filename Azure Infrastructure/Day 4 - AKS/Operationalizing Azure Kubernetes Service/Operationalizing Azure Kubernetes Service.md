@@ -48,14 +48,16 @@ az aks create \
     --service-principal "${SP_ID}" \
     --client-secret "${CLIENT_SECRET}"
 
+CURRENT_RAND=$RANDOM
+
 echo "Creating Log Analytics workspace..."
 az monitor log-analytics workspace create \
     --resource-group $RESOURCE_GROUP \
-    --name "${AKS_RESOURCE}LA"
+    --workspace-name "${AKS_RESOURCE}LA-${CURRENT_RAND}"
 
 WORKSPACE_ID=$(az monitor log-analytics workspace show \
     --resource-group $RESOURCE_GROUP \
-    --workspace-name "${AKS_RESOURCE}LA" \
+    --workspace-name "${AKS_RESOURCE}LA-${CURRENT_RAND}" \
     --query "id" \
     -o tsv)
 echo "WORKSPACE_ID: $WORKSPACE_ID"
@@ -349,6 +351,8 @@ az aks create \
 
 ## Demo: Exploring Azure Monitor for containers
 
+*Use the same cluster created in the first demo: [Cluster for SP Reset](#cluster-for-sp-reset)*
+
 1. Earlier, I enabled monitoring on the cluster at the time I created it using `az aks enable-addons`:
 
     ```sh
@@ -359,4 +363,22 @@ az aks create \
         --workspace-resource-id $WORKSPACE_ID
     ```
 
-kubectl get ds omsagent --namespace=kube-system
+    You can enable monitoring at the time a cluster is instantiated or you can enable it later through the Azure CLI, the Azure portal, and Resource Manager templates.
+
+2. To verify that the OMA agent has been deployed to your cluster, you can run `kubectl get ds omsagent`:
+
+    ```sh
+    kubectl get ds omsagent --namespace=kube-system
+    ```
+
+3. After you have verified agent deployment, you can verify that the Kubernetes deployment has been executed as well:
+
+    ```sh
+    kubectl get deployment omsagent-rs -n=kube-system
+    ```
+
+4. You can also go a step further and verify pod health:
+
+    ```sh
+    kubectl get pods -n=kube-system | grep "omsagent"
+    ```
