@@ -173,3 +173,8 @@ In this challenge, you will create two Azure Logic Apps for retrieving users fro
 * <span class="colour" style="color: rgb(36, 41, 46);">You have added two new Logic Apps</span>
 
 ## Progressing to the next challenge
+
+## Resources
+```
+https://docs.microsoft.com/en-us/azure/logic-apps/
+```
