@@ -599,7 +599,7 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
 
     **Solution:** As new versions of Ubuntu are released in a preview state, new clusters can be provisioned in Azure which target the new OS and testing can be performed against them.
 
-    It is also possible to test new operating systems before they are avaialble in the formal AKS service by leverage the underlying deployment and provisioning engine that Microsoft uses for AKS - [AKS Engine](https://github.com/Azure/aks-engine):
+    It is also possible to test new operating systems before they are available in the formal AKS service by leverage the underlying deployment and provisioning engine that Microsoft uses for AKS - [AKS Engine](https://github.com/Azure/aks-engine):
 
     > *AKS Engine provides convenient tooling to quickly bootstrap Kubernetes clusters on Azure. By leveraging ARM (Azure Resource Manager), AKS Engine helps you create, destroy and maintain clusters provisioned with basic IaaS resources in Azure. AKS Engine is also the library used by AKS for performing these operations to provide managed service implementations.*
 
