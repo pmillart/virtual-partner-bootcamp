@@ -456,12 +456,13 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
     Taints can be applied to a node pool using the `--node-taints` parameter of the `az aks nodepool add` command. For example:
 
     ```sh
-    az aks nodepool add --node-taints aks-iopspool-28993262-vmss000000 sku=iops:Schedule
+    az aks nodepool add \
+      -g ...
+      -n ...
+      --node-taints iopspool sku=iops:NoSchedule
     ```
 
-    **Note:** The `--node-taints` parameter is adding a taint to a node pool based on the clusters internal name for the pool - not the friendly name you used when you created the node pool originally. To find this name, you need to authenticate to the cluster and run `kubectl get nodes`.
-
-    Creating pods and specifying a toleration of `sku=iops:Schedule` will allow the pod to be scheduled on the specified node pool. For example:
+    Creating pods and specifying a toleration of `sku=iops:NoSchedule` will allow the pod to be scheduled on the specified node pool. For example:
 
     ```yaml
     apiVersion: v1
@@ -470,7 +471,7 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
       name: iopspod
     spec:
       containers:
-      - image: nginx:1.15.9
+      - image: myImage
         name: iopspod
         resources:
           requests:
@@ -483,7 +484,7 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
       - key: "sku"
         operator: "Equal"
         value: "iops"
-        effect: "schedule"
+        effect: "NoSchedule"
     ```
 
 2. **Design:** What IP addressing scheme would you recommend to Contoso Commerce to best balance resource usage for nodes and pods?
