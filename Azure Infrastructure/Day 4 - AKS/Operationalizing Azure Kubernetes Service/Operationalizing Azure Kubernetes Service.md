@@ -18,15 +18,15 @@ Pre-stage your environment with the following resource groups and resources.
 az group create -l eastus -n clusterResetRG
 SP_NAME="aksClusterReset_sp"
 CLIENT_SECRET_VALID=""
-while [ -z $ CLIENT_SECRET_VALID ]; do
+while [ -z $CLIENT_SECRET_VALID ]; do
   echo "Creating new SP and secret..."
   CLIENT_SECRET=$(az ad sp create-for-rbac --skip-assignment -n $SP_NAME -o json | jq -r .password)
   if [[ $CLIENT_SECRET == *"'"* ]]; then
     echo "Found invalid character. Recreating..."
-    CLIENT_SECRET_VALID =""
+    CLIENT_SECRET_VALID=""
   else
     echo "Appears valid..."
-    CLIENT_SECRET_VALID ="true"
+    CLIENT_SECRET_VALID="true"
   fi
 done
 echo "CLIENT_SECRET ready: ${CLIENT_SECRET}"
