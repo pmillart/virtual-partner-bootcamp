@@ -35,3 +35,8 @@ https://portal.azure.com
 ## Progressing to the Next Challenge
 
 <span class="colour" style="color:rgb(36, 41, 46)">After you have completed the challenge, click the </span>**Validate**<span class="colour" style="color:rgb(36, 41, 46)"> button to check your results.</span>
+
+## Resources
+```
+https://docs.microsoft.com/en-us/healthbot/
+```
