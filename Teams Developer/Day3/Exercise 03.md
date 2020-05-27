@@ -41,3 +41,7 @@ Add a new container Partition key using **userPrincipalName**
 ## Progressing to the next challenge<span class="colour" style="color:rgb(36, 41, 46)"></span>
 
 <span class="colour" style="color:rgb(36, 41, 46)"></span>
+ ## Resources
+ ```
+ https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container
+ ```
