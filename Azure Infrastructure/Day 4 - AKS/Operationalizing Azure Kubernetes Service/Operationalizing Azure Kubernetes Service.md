@@ -8,6 +8,9 @@
   - [AAD RBAC](#aad-rbac)
   - [Access the cluster with AAD](#access-the-cluster-with-aad)
 - [Demo: Cluster autoscaling in multiple node pools](#demo-cluster-autoscaling-in-multiple-node-pools)
+  - [Adding a new node pool](#adding-a-new-node-pool)
+  - [Enabling the cluster autoscaler](#enabling-the-cluster-autoscaler)
+- [Demo: Exploring Azure Monitor for containers](#demo-exploring-azure-monitor-for-containers)
 
 ## Prerequisites
 
@@ -16,8 +19,11 @@ Pre-stage your environment with the following resource groups and resources.
 ### Cluster for SP Reset
 
 ```sh
-az group create -l eastus -n clusterResetRG
-SP_NAME="aksClusterReset_sp"
+REGION_NAME="eastus"
+RESOURCE_GROUP="clusterResetRG"
+AKS_RESOURCE="aksCluster"
+az group create -l $REGION_NAME -n $RESOURCE_GROUP
+SP_NAME="${AKS_RESOURCE}Reset_sp"
 CLIENT_SECRET_VALID=""
 while [ -z $CLIENT_SECRET_VALID ]; do
   echo "Creating new SP and secret..."
@@ -35,11 +41,30 @@ echo "CLIENT_SECRET ready: ${CLIENT_SECRET}"
 SP_ID=$(az ad sp show --id "http://$SP_NAME" -o json | jq -r .appId)
 echo "SP_ID: ${SP_ID}"
 
+echo "Creating AKS cluster..."
 az aks create \
-    --resource-group clusterResetRG \
-    --name aksCluster \
+    --resource-group $RESOURCE_GROUP \
+    --name $AKS_RESOURCE \
     --service-principal "${SP_ID}" \
     --client-secret "${CLIENT_SECRET}"
+
+echo "Creating Log Analytics workspace..."
+az monitor log-analytics workspace create \
+    --resource-group $RESOURCE_GROUP \
+    --name "${AKS_RESOURCE}LA"
+
+WORKSPACE_ID=$(az monitor log-analytics workspace show \
+    --resource-group $RESOURCE_GROUP \
+    --workspace-name "${AKS_RESOURCE}LA" \
+    --query "id" \
+    -o tsv)
+echo "WORKSPACE_ID: $WORKSPACE_ID"
+
+echo "Enabling monitoring for cluster..."
+az aks enable-addons -a monitoring \
+    --name $AKS_RESOURCE \
+    --resource-group $RESOURCE_GROUP \
+    --workspace-resource-id $WORKSPACE_ID
 ```
 
 ### Cluster for AAD
@@ -204,3 +229,134 @@ az aks create \
 ## Demo: Cluster autoscaling in multiple node pools
 
 *Use the same cluster created in the first demo: [Cluster for SP Reset](#cluster-for-sp-reset)*
+
+### Adding a new node pool
+
+1. Let's take a look at the existing cluster and view its node pools:
+
+    ```sh
+    az aks nodepool list --resource-group clusterResetRG --cluster-name aksCluster
+    ```
+
+2. We can see we have a single system node pool at the moment. Let's extend this with a new user node pool.
+
+    ```sh
+    az aks nodepool add \
+        --resource-group clusterResetRG \
+        --cluster-name aksCluster \
+        --name userpool \
+        --node-count 3 \
+        --node-taints pool=userpool:NoSchedule \
+        --kubernetes-version $(az aks show --resource-group clusterResetRG --name aksCluster --query "kubernetesVersion" -o tsv)
+    ```
+
+    > **Note:** This command takes a few minutes to run. While it is running, navigate to the Azure Portal and the *aksCluster* resource. Show how the node pools are visible through the **Node pools** blade and also the node pool creation experience is availabe in the portal as well.
+
+3. Once the node pool is created, let's go back and view our list again:
+
+    ```sh
+    az aks nodepool list --resource-group clusterResetRG --cluster-name aksCluster -o table
+    ```
+
+4. Let's connect to our cluster and take a look at the existing nodes:
+
+    ```sh
+    az aks get-credentials --resource-group clusterResetRG --name aksCluster --overwrite-existing
+    kubectl get nodes
+    ```
+
+5. Now to schedule pods on our new nodes using taints and tolerations, let's make sure out taints where applied to the pool when we created it earlier. Note that taints can only be applied to a pool at the time it is created and cannot be added later, so some planning is required here.
+
+    ```sh
+    az aks nodepool show --resource-group clusterResetRG --cluster-name aksCluster --name userpool --query "nodeTaints"
+    ```
+
+6. With out taint verified, let's create a quick manifest, deploy some pods, and make sure they're scheduled on the right nodes. (Copy yaml and save as `userpool.yaml`):
+
+    ```yaml
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: userpoolpod
+    spec:
+      containers:
+      - image: nginx:1.15.9
+        name: mypod
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 1
+            memory: 2G
+      tolerations:
+      - key: "pool"
+        operator: "Equal"
+        value: "userpool"
+        effect: "NoSchedule"
+    ```
+
+7. Let's apply our manifest:
+
+    ```sh
+    kubectl apply -f userpool.yaml
+    ```
+
+8. With our pod deployed, let's verify it ended up on a node in the right pool:
+
+    ```sh
+    kubectl describe pod userpoolpod
+    ```
+
+### Enabling the cluster autoscaler
+
+1. Ok, let's move on to enabling the cluster autoscaler. (Note this takes a few minutes)
+
+    ```sh
+    az aks nodepool update \
+        --resource-group clusterResetRG \
+        --cluster-name aksCluster \
+        --name userpool \
+        --enable-cluster-autoscaler \
+        --min-count 1 \
+        --max-count 3
+    ```
+
+2. Now we can see how even though we set the autoscaler for a single node pool, it did in fact effect the entire cluster:
+
+    ```sh
+    az aks show --resource-group clusterResetRG -n aksCluster --query "autoScalerProfile"
+    ```
+
+3. If we want to update the configuration, we use use az aks update, but before we can do that we need to install the `aks-preview` extension:
+
+    ```sh
+    # Install the aks-preview extension
+    az extension add --name aks-preview
+
+    # Update the extension to make sure you have the latest version installed
+    az extension update --name aks-preview
+    ```
+
+4. With the extension installed, let's  update our autoscaler configuration:
+
+    ```sh
+    az aks update \
+        --resource-group clusterResetRG \
+        --name aksCluster \
+        --cluster-autoscaler-profile scan-interval=30s
+    ```
+
+## Demo: Exploring Azure Monitor for containers
+
+1. Earlier, I enabled monitoring on the cluster at the time I created it using `az aks enable-addons`:
+
+    ```sh
+    echo "Enabling monitoring for cluster..."
+    az aks enable-addons -a monitoring \
+        --name $AKS_RESOURCE \
+        --resource-group $RESOURCE_GROUP \
+        --workspace-resource-id $WORKSPACE_ID
+    ```
+
+kubectl get ds omsagent --namespace=kube-system
