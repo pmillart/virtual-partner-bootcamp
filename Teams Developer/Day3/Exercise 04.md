@@ -26,5 +26,9 @@ In the Azure portal visit Azure Active Directory. Because it is necessary to rea
 * <span class="colour" style="color:rgb(36, 41, 46)">You have allowed permissions to utilize the Graph API</span>
 
 ## Progressing to the next challenge
-<br>
-<br>
+
+
+## Resources
+```
+https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis
+```
