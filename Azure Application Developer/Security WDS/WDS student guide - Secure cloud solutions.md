@@ -30,7 +30,12 @@ Microsoft and the trademarks listed at <https://www.microsoft.com/legal/intellec
   - [Abstract and learning objectives](#abstract-and-learning-objectives)
   - [Step 1: Review the customer case study](#step-1-review-the-customer-case-study)
     - [Customer situation](#customer-situation)
-    - [Customer needs](#customer-needs)
+  - [Customer Requirements](#customer-requirements)
+    - [Proide Unified Identity Provisioning, Management, and Login](#proide-unified-identity-provisioning-management-and-login)
+    - [Utilize Approrpiate Configuration and Access Control Using Identity Roles](#utilize-approrpiate-configuration-and-access-control-using-identity-roles)
+    - [Ensure Data encryption - AT ALL TIMES (at rest and in motion)](#ensure-data-encryption---at-all-times-at-rest-and-in-motion)
+    - [Provide Robust Application Security](#provide-robust-application-security)
+  - [Requirement Summary](#requirement-summary)
     - [Customer objections](#customer-objections)
     - [Infographic for common scenarios](#infographic-for-common-scenarios)
   - [Step 2: Design a proof of concept solution](#step-2-design-a-proof-of-concept-solution)
@@ -48,7 +53,7 @@ In this whiteboard design session, you will learn how to implement different com
 
 - Identity: Authorization and Access for B2C and B2B scenarios
 - Secure Azure PaaS resources such as App Services web apps, Azure SQL from public endpoints
-- Secure your secrets,passwords, and application configuration data from code repositories to production
+- Secure your secrets, passwords, and application configuration data from code repositories to production
 - Use Azure Policies and Role Based Access Control (RBAC).
 
 At the end of this whiteboard design session, you will improve your knowledge of Authorization and access of developer resources. You will improve your knowledge of data encryption at rest and in transit. Learn how to keep solution secrets outside of source control. Learn about secret management and abstract key rotation away from applications and their developers. You will be able to better protect applications in the cloud from external threats by guarding public endpoints. Learn to give your applications access to secrets so development teams won't need to keep track or even know the actual secrets.
@@ -71,31 +76,110 @@ Directions: With all participants in the session, the facilitator/SME presents a
 
 ### Customer situation
 
-Contoso Plumbing Supply (Contoso) is a family owned wholesale plumbing supply company founded in Minneapolis, Minnesota that has been around for over 40 years. In that time, the company has thrived by embracing new business technology and practices, a mindset passed on to the current CEO and granddaughter [NAME HERE] of the company founder.
+The renewable energy industry is growing fast!   
 
-In the 1990's, Contoso created a data center in the back of their main warehouse to handle customer orders and supply chain management. Over the years Contoso has modernized their data center to keep up with demand and it has worked well for them, allowing Contoso to acquire two plumbing supply companies that were not as fortunate, and a regional retail plumbing store.
+Contoso Solar Inc (Contoso) is a family owned commercial and residential solar installation and wholesale supply firm headquartered in the Pacific NorthWest, Unitest States.    
 
-Contoso now has warehouse locations in Pennsylvania, Seattle, and Nevada and retail locations in the surrounding states. In order to serve these locations, Contoso is adopting cloud technology to provide supply chain services and direct to consumer ordering. Additionally, Contoso wants to migrate all the functionality to the cloud and retire their small local data center.
+Established 2004, Contoso Solar have almost tripled in size, and have taken on a lot of new projects that even take them from a US Domestic only operation, to an international operation with the the closing of a lucrative project from neighboring British Columbia, Canada.   This has been a long and exciting road that involved a 36 month app-modernization effort coupled with a recent lift and shift to the cloud using Azure.  This was followed again by an 18 month re-design of their key applications to take advantage of serverless deployments to take advantage of swifter time to market to accomodate the massive grwoth enjoyed industry wide.  
 
-Contoso's main concern is providing **secure connectivity** for it's own suppliers and customers while also providing an easy online experience for them. Contoso currently manages authentication with a private Identity server and wants to move to a more robust solution.
+Now the overall cost to install solar has dropped by almost 70% and charging and conversion efficiency has increased to boot making solar more accessible - in many cases, with components converging on commodity status.  
 
-With the addition of a lot of new employees, Contoso needs a solution that will provide authentication to the system as well as handle permissions and access to specific data. In particular, customers that purchase from the retail website should not be able to access the wholesale prices, but a sales rep at the store location should be able to see that information in order to make on the spot deals. This requires a system for access and authentication that can be centrally controlled by the management teams.
+Contoso Solar currently has three satellite offices, each supporting installation, fulfullment, and distribution teams:  Portland, OR, Seattle, WA, and Austin, TX.   And, as a result of their success in the industry as well as achieving GDPR/CCPA compliance including a SOC 3 certification, they will be opening a new office in Vancouver, BC to tackle the new commercial business acquired in BC which is the installation of solar for a number of provincial buildings including schools, and transit stations.   
 
-In addition to Authentication and Access management (Identity), Contoso wants to see secure network architecture for the various locations. The web applications need to be secure as well, with no application secrets stored in any config or application settings so they can be managed by the security team only. Contoso wants the security team to control all the certificates, keys, and tokens for the applications and users at the company.
+Contoso now has most of their key line of business applications, data storage, and analysis operations on Azure and their enterprise supports direct integrations with first tier solar technology manufacturers and component suppliers. 
 
-### Customer needs
+Contoso's main concern is providing **robust application security** for it's own suppliers and customers while also providing an easy online experience for them. Contoso currently manages authentication via Azure Active Directory but wants to reconfigure to support a more robust solution for 3 major user experiences:
 
-1. Identity Login: Retail users (the public) should be able to create an account using a social login and save payment details and view past orders. New employees should be able to login with single sign-on and require multi-factor authorization.
-2. Identity Roles: Employees should have access only to the information they need to do their job.
-3. Data encryption: All data is encrypted at rest and in transit.
-4. Network Security: Data needs to be consistent, which means information from one location and others needs to sync, and do so securely.
-5. Developers should not have access to production application secrets.
-6. The Application will need to authenticate with Azure services such as Key Vault.
-7. Client applications will need to authenticate - Contoso needs a strategy for access tokens and authentication.
+* **B2B** - Solar Manufacturer and Providers, including professional technical contributors such as: architectural, engineering, and regulatory/legal advisors from state and local entities
 
-*This solution should be a combination of securing **SQL server** using **TDE** and **always encrypted** setting up network security on the **VNET** using **NSGs**. Additionally, the application secrets should be in **Azure Key Vault** and the connections should all be **SSL** and **tls**. The application should require log-in through AAD or social using Microsoft Identity v2. The data needs to be consistent so back up and replication syncing should be included. **Cosmos DB** is another possible solution either to replace or in addition to SQL server. Any storage accounts or other types of access can use **shared access signatures** with policies or some other form of **revokable token** for access. security.*
+* **B2C** - DYI Consumers purchasing components and services directly - either wholesale or retail, and/or opting in persistent account access enabling consumer access to extended offerings provided by Contoso Solar Consumer Services including pre- and post- sales technical support, blog access, and access to technical events sponsored by the industry
 
-*The solution will be deployed in multiple regions and use Traffic Manager with WAF on the front-end. The solutions will use auto scale with app services for the web sites based on traffic and cpu. For the fast performance in ordering, users should use some form of CQRS and messaging (Table Queues or Azure Service Bus) and the order subscriber to the queue should query the queue length to autoscale.*
+* **OPS** - Internal employee groups such as C-Suite, HR, IT, Fulfillment, Installation Teams, Partner and Consumer Services, Sales and Marketing
+
+With these use cases and the addtion of new infrastructure, locations, and employees, Contoso Solar needs a solution that will provide reliable authentication but in addition, they require robust account management functionality, as well as the ability to secure and audit application configuration, and integration events. 
+
+In particular, Suppliers accessing Contoso Solar's Supplier Workflow and APIs should only have access to resources granted to those accounts.   One Supplier should not be able to interact with allocated resources of another supplier.   
+
+Customers purchasing from the retail website should not be able to access wholesale prices, but an OPS Contoso Sales Account Manager should be able to see both retail and wholesale information for both B2B and B2C scenarios. 
+
+This requires a system for access and authentication that can be centrally controlled by the Contoso Solar OPS IT Team.
+
+In addition to Authentication and Access management (Identity), Contoso Solar wants to ensure that their backend infrastructure use as much of the Azure backbone as possible to include direct integrations with their cloud-based CRM and ERP systems.   And of course, any APIs and Web Applications need to be secure as well, with no application secrets stored in any config or application settings so they can be managed by the security team in accordance with their InfoSec Policy. 
+
+Contoso wants the security team to control all certificates, keys, and tokens for the applications and users at the company.
+
+## Customer Requirements 
+The following requirements are a result of over a year of hard work assessing Contoso Solar's IT security requirements in order to maintain compliance with certain certifications they need to work with global providers and provide for their customers, as well as transacting with first-tier payment providers and certifcation organizations. 
+
+Fulfiliing these requirements using robust, repeatable capabilities is essential to Contoso Solar's continued growth and success.   Failure in any one of these areas can jeaopardize the firm's ability to maintain their current level of compliance    
+
+### Proide Unified Identity Provisioning, Management, and Login
+As per use cases above, there are three valid authentication scenarios:  
+
+**B2B** - DIY Retail Consumers should be able to use the ecommerce purchase path to purchase solar components with an anonymous cart purchase path.   Or they can create a persistent account with Contoso Solar, using an email as username or using a social login from a valid Identity Provider, and save payment methods and view order status and order history along with sharing other social details if they desire.   This method gives them access to pre- and post- sales technical support as well as event and blog content.  
+
+**B2C** - DIY Retail Consumers should be able to use the ecommerce purchase path to purchase solar components with an anonymous cart purchase path.   Or they can create a persistent account with Contoso Solar, using an email as username or using a social login from a valid Identity Provider, and save payment methods and view order status and order history along with sharing other social details if they desire.   This method gives them access to pre- and post- sales technical support as well as event and blog content.  
+
+**OPS** - Existing and New employees should be able to login with thier assigned Active Directory Domain Login and, optionally may require multi-factor authorization (MFA).   Once authenticated the user will experience single sign-on (SSO) behavior across enterprise applications and endpoints until they fully log out.
+
+### Utilize Approrpiate Configuration and Access Control Using Identity Roles
+As per Contoso Solar's Infosec and Data Handling Policies, there is an active Segregation of Duties Matrix based on Employee Role.  Therefore, employees should have access only to the information they need to perform their duties.  This requirement implies use of Role-based Access Control (RBAC) within the enterprise.   
+
+### Ensure Data encryption - AT ALL TIMES (at rest and in motion)
+As Per Contoso Solar's Infosec and Data Handling Policies, data will be encrypted throughout the application stack, regardless of location and status and this includes during application syncronization and data upload/download.  
+
+Example data classification of Contoso Solar secure data: 
+
+- Client Architectural, Engineering, Requirements, or Legal and Regulatory documents uploaded by architectural firms or by state and local regulatory entities 
+- ERP, Poduct, Product Catalog, and Service Process data classified as **Business Critical ** by Contoso Solar
+- CRM, Sales Pipeline/Biz-Dev, Supplier, and Consultative Contributor, and Persistent Retail Customer profile data
+- Analysis and Transactional Data related to Wholesale and Retail Transactions
+- Employee HR data to include data that is considered PII by GDPR/CCPA standards
+
+### Provide Robust Application Security
+Contoso Solar is almost completely in the Azure Cloud, and operates mostly in North American West Coast. This means that for now, performance for multiple regions takes a back seat to security configuration concerns.  The IT Group has implemented minimal HADR currently, but since Contoso Solar is growing, their IT Group will revisit these topics in the near future.  
+
+At this point, consider all front-end APIs and Web Apps are written using .Net/ASP.NET Core and are deployed to auto-scaled app service plans.   In the near future, the Application Architecture Team is considering converting to a CQRS architecture to address scale concerns for upcoming growth by using an event/messaging, or pub-sub design pattern. 
+
+In terms of development requirements, a few things are clear:  
+1. Developers should not have direct code-level access to production application secrets
+2. Applications need to be configured to authenticate with Azure services such as Azure SQL Database, and Azure Key Vault
+3. Client applications will need to authenticate discreet classes of users - Contoso needs a strategy for access tokens and authentication
+
+**NOTE**
+
+While application security is the primary concern right now, the client is growing, so consideration for scale and performance should be included during design.
+
+## Requirement Summary
+
+Walking through Contoso Solar's stack with these requirements in mind, we see this solution should be a combination of:
+
+- Securing **Azure SQL Database** using **Transparent Data Encryption (TDE)** and using **Always Encrypted (AE)** within client applications to ensure data is encrypted AT REST and IN MOTION.
+Azure SQL Database is now provisioned with TDE enabled by default, so a proper solution will focuse on the implementation of AE along with application composure of the .NET AE client libraries with Azure-managed key rotation. 
+
+- Access to sensitive data within the database is controlled by **Role-based Access Control (RBAC)** in two key ways: 
+
+  a) Object-based permissions on specific tables, stored procedures, and views via RBAC.
+
+  b) **Row-level Security(RLS)** applied on key tables, for instance on Supplier tables, filtered by SupplierID to ensure each Supplier can only view data specific to that SupplierID.   
+
+- Any blob storage accounts, data lake staging, or other types of raw storage should use generated **Shared Access Signatures (SAS)** with configured policies or some other form of **revokable token** for access since 3rd parties often integrate using cloud blob stores
+
+- Applications integrate with data stores and other applications via **Azure Service Principals**
+
+- Application connections should be configured using **SSL** and **TLS** and application secrets and other sensitive configuration information such as connection strings should be stored in **Azure Key Vault** and the application should use the appropriate .NET pre-built client libraries to retrieve this data
+
+- Applications should require log-in through **AAD** or **Microsoft Identity Platform V2**.  Applications will compose the use of purpose-built client libraries (**ADAL** or **MSAL**) to integrate with Azure identity platform offerings, and facilitate consistent architecture and operation across the enterprise
+
+- Contoso Solar does use **Azure Functions** in some of their workflows, and so should be considered in the overall application security plan
+
+**NOTE**  
+
+Contoso Solar's Development Team have settled on Azure DevOps as their primary CI/CD platform and the run a tight ship with a clean backlog, using a Git-Flow   
+
+Applications are deployed using Azure DevOps Pipelines with minimal 3rd party tool interaction with the exception of some common open source testing and verification/risk management libraries.  
+
+Their typical sprint is 7 days with trunk releases (major, minor, and patch) in a blue-green configuration every Thursday.  
 
 ### Customer objections
 
@@ -115,49 +199,56 @@ Time frame: 60 minutes
 
 **Business needs**
 
-Directions:  With all participants at your table, answer the following questions and list the answers on a flip chart:
+Directions:  With all participants at your table, answer the following questions and list the answers on a flip chart.  
 
-1. Who should you present this solution to? Who is your target customer audience? Who are the decision makers?
-
-2. What customer business needs do you need to address with your solution?
+First, start defining the team approach by identifying the following:
+1. Who is your target customer audience?   
+2. Who should you present this solution to?  
+3. Who are the decision makers in the scenario?
+4. What customer business needs do you need to address with your solution?
+5. Is there a priority or order in implementation that you think the cient should consider? 
 
 **Design**
 
-Directions: With all participants at your table, respond to the following questions on a flip chart:
+Directions: With all participants at your table, respond to the following requirements:
 
-*High-level architecture*
+*Produce a High-level architecture*
 
-1. Without getting into the details (the following sections will address the particular details), diagram your initial vision for handling the top-level requirements for the mobile and web applications, data management, search, and extensibility.
+- Without getting into the details (the following sections will address the particular details), diagram your initial vision for handling the top-level requirements for the mobile and web applications, data management, search, and extensibility.
 
-*Secure application secrets*
+*Provide data security from the primary data store forward to API/Application*
 
-1. List the requirements for securing the different applications secrets
+- List the requirements for securing data at rest and in motion across the client stack using features like Transparent Data Encryption and Always Encrypted
+- How can the client use their current infrastructure to limit what data users have access to as determined by role? 
+- What methods can be applied to protect sensitive customer information such as transaction and PII classified data? 
 
-*Secure Data management*
+*Provide security for Sensitive Application Configuration Information*
 
-1. List the requirements for TDE and Always Encrypted here.
+- List the requirements for securing application secrets, connection strings, credentials, and related configuration information
+- List requirements for ensuring application protocol security for distributed web applications 
 
-*Networking*
+*Provide security for bulk data upload and transfer between partner suppliers and client*
 
-1. List requirements for securing data in transit over the network
+- Describe simple but effective ways in which the client can use Azure Services to enable Suppliers to integrate in terms of large file-based data bi-directional transfers? 
+- What other Azure Tools or Services can be used to facilitate secure data transfers across corporate boundaries?
 
 *Extensibility*
 
-1. How will you ensure the application scales and can expand into new regions?
-
-2. How will you ensure the solution will scale appropriately under heavy traffic?
+- Using Azure, how can the client ensure application scaling and performance as they grow and expand into new regions?
+- What new Azure services or configurations might be required to ensure that the entire solution will scale appropriately under high demand?
+- What can Contoso Solar Architecture Team consider to "future proof" application architecture to promote an easier extensibility path to match growth potential?
 
 **Prepare**
 
 Directions: With all participants at your table:
 
-1. Identify any customer needs that are not addressed with the proposed solution.
+- Identify any customer needs that are not addressed with the proposed solution
 
-2. Identify the benefits of your solution.
+- Identify the benefits of the proposed solution, and list potential caveats
 
-3. Determine how you will respond to the customer's objections.
+- Determine how you will respond to the customer's objections
 
-Prepare a 15-minute chalk-talk style presentation to the customer.
+- Prepare a 15-minute, staged "chalk-talk" presentation to the customer
 
 ## Step 3: Present the solution
 
@@ -196,11 +287,13 @@ Directions: Tables reconvene with the larger group to hear the facilitator/SME s
 |                 |           |
 |-----------------|-----------|
 | **Description** | **Links** |
-| Hi-resolution version of blueprint | <https://msdn.microsoft.com/dn630664#fbid=rVymR_3WSRo> |
-| Key Vault Developer's Guide | <https://azure.microsoft.com/documentation/articles/key-vault-developers-guide/> |
-| About Keys and Secrets | <https://msdn.microsoft.com/library/dn903623.aspx> |
-| Register an Application with AAD | <https://azure.microsoft.com/documentation/articles/key-vault-get-started/#register> |
-| How to Use Azure Redis Cache | <https://azure.microsoft.com/documentation/articles/cache-dotnet-how-to-use-azure-redis-cache/> |
-| Intro to Redis data types & abstractions | <http://redis.io/topics/data-types-intro> |
-| Working with Azure Functions Proxies | <https://docs.microsoft.com/azure/azure-functions/functions-proxies> |
-| Azure API Management Overview | <https://docs.microsoft.com/azure/api-management/api-management-key-concepts> |
+| Azure SQL Database TDE (BYOK)         | <https://docs.microsoft.com/en-us/azure/azure-sql/database/transparent-data-encryption-byok-configure> |
+| Azure SQL Database Always Encrypted   | <https://docs.microsoft.com/en-us/azure/azure-sql/database/always-encrypted-certificate-store-configure> |
+| Azure SQL Database Row Level Security | https://azure.microsoft.com/en-us/resources/videos/row-level-security-in-azure-sql-database/ |
+| Azure Key Vault Developer's Guide     | <https://azure.microsoft.com/documentation/articles/key-vault-developers-guide/>|
+| About Keys and Secrets                | <https://msdn.microsoft.com/library/dn903623.aspx> |
+| Azure API Management Overview         | <https://docs.microsoft.com/azure/api-management/api-management-key-concepts> |
+| Register an Application with MID V2   | <https://docs.microsoft.com/en-us/graph/auth-register-app-v2>|
+| Azure MSAL Authentication Flows       | <https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-authentication-flows>|
+| Working with Azure Functions Proxies  | <https://docs.microsoft.com/azure/azure-functions/functions-proxies> |
+|Git Trunk-based Development|https://trunkbaseddevelopment.com/|
