@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "testName": {
+      "type": "string",
+      "defaultValue": "Jimmy"
+    },
+    "deploymentScriptName": {
+      "type": "string",
+      "defaultValue": "[utcNow()]"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2019-10-01-preview",
+      "name": "[parameters('deploymentScriptName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "AzurePowerShell",
+      "identity": {
+        "type": "userAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/41811f87-4f0d-44d0-bec9-a9b162257403/resourceGroups/TemplateRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MI959": {
+          }
+        }
+      },
+      "properties": {
+        "forceUpdateTag": 2,
+        "azPowerShellVersion": "3.0",
+        "arguments": "[concat('-name ', parameters('testName'))]",
+        "environmentVariables": [
+          {
+            "name": "fruit",
+            "value": "bananas"
+          },
+          {
+            "name": "secretFruit",
+            "secureValue": "apples"
+          }
+        ],
+        "scriptContent": "
+          param([string] $name)
+          $output = 'Hello {0}' -f $name
+          Write-Output $env:fruit
+          Write-Error $env:secretFruit
+          $DeploymentScriptOutputs = @{}
+          $DeploymentScriptOutputs['text'] = $output
+          throw
+        ",
+        "supportingScriptUris": [
+        ],
+        "timeout": "PT30M",
+        "cleanupPreference": "OnExpiration",
+        "retentionInterval": "P1D"
+      }
+    }
+  ]
+}
