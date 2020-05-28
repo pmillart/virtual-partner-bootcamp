@@ -7,15 +7,14 @@ jobs:
   build-and-deploy:
     runs-on: windows-latest
     steps:
-# The following example shows the part of the workflow that uses the actions/setup-dotnet action to set up the environment
-      - name: 'Login via Azure CLI'
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Setup Dotnet 2.2.300
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '2.2.300'
+      - name: 'Run dotnet build'
+        shell: bash
+        run: |
+          # If your function app project is not located in your repository's root
+          # Please consider using pushd to change your path
+          pushd .
+          dotnet build --configuration Release --output ./output
+          popd
 
 # CONFIGURATION
 # For help, go to https://github.com/Azure/Actions
