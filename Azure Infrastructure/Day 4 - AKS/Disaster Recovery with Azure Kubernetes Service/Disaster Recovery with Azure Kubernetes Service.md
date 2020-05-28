@@ -94,3 +94,8 @@ az aks nodepool add \
     kubectl get pods --all-namespaces -o json | \
         jq -r '.items[] | {name:.metadata.name,node:.spec.nodeName} | select(.node | contains("zonal"))'
     ```
+
+6. Now let's deploy a few pods and see how they spread out. Let's just use ngnix:
+
+    ```sh
+    kubectl run nodepool1-test --image=nginx --replicas=5
