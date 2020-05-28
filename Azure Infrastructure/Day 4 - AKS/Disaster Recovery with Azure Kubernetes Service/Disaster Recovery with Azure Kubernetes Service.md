@@ -87,3 +87,10 @@ az aks nodepool add \
     ```sh
     kubectl describe pod --all-namespaces | grep -e "^Name:" -e "^Node:"
     ```
+
+5. We can again use jq to help us out to get a cleaner list:
+
+    ```sh
+    kubectl get pods --all-namespaces -o json | \
+        jq -r '.items[] | {name:.metadata.name,node:.spec.nodeName} | select(.node | contains("zonal"))'
+    ```
