@@ -56,6 +56,7 @@ az aks nodepool add \
     --resource-group $RESOURCE_GROUP \
     --mode User \
     --node-count 2 \
+    --node-taints pool=zonalpool:NoSchedule \
     --zones 1 3
 ```
 
@@ -99,7 +100,61 @@ az aks nodepool add \
         jq -r '.items[] | {name:.metadata.name,node:.spec.nodeName} | select(.node | contains("zonal"))'
     ```
 
-6. Now let's deploy a few pods and see how they spread out. Let's just use ngnix:
+6. Now let's deploy a few pods and see how they spread out. Let's just use nginx. First, let's create a deployment:
+
+    ```yaml
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: nginx-deployment
+      labels:
+        app: nginx
+    spec:
+      replicas: 5
+      selector:
+        matchLabels:
+          app: nginx
+      template:
+        metadata:
+          labels:
+            app: nginx
+        spec:
+          containers:
+          - name: nginx
+            image: nginx:1.14.2
+            ports:
+            - containerPort: 80
+    ```
 
     ```sh
-    kubectl run nodepool1-test --image=nginx --replicas=5
+    kubectl apply -f nginx.yaml
+    ```
+
+    ```sh
+    kubectl get pods -l app=nginx -o wide
+    ```
+
+## Demo: Backup and restore with Velero
+
+TENANT_ID=...
+SUBSCRIPTION_ID=...
+SOURCE_AKS_RESOURCE_GROUP=MC_...
+TARGET_AKS_RESOURCE_GROUP=MC_... # (optional, if you want to migrate)
+BACKUP_RESOURCE_GROUP=backups
+BACKUP_STORAGE_ACCOUNT_NAME=velero$(uuidgen | cut -d '-' -f5 | tr '[A-Z]' '[a-z]')
+
+# Create Azure Storage Account
+az storage account create \
+  --name $BACKUP_STORAGE_ACCOUNT_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --sku Standard_GRS \
+  --encryption-services blob \
+  --https-only true \
+  --kind BlobStorage \
+  --access-tier Hot
+  
+ # Create Blob Container
+ az storage container create \
+   --name velero \
+   --public-access off \
+   --account-name $BACKUP_STORAGE_ACCOUNT_NAME
