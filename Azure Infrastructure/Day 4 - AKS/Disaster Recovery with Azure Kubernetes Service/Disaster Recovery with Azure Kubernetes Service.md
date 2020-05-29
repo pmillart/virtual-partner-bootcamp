@@ -3,6 +3,7 @@
 - [Prerequisites](#prerequisites)
 - [Demo: Verifying node distribution](#demo-verifying-node-distribution)
 - [Demo: Backup and restore with Velero](#demo-backup-and-restore-with-velero)
+- [Demo: Azure Container Registry geo-replication](#demo-azure-container-registry-geo-replication)
 
 ## Prerequisites
 
@@ -418,3 +419,6 @@ kubectl get nodes -o json | \
 ```
 
 As you can see, my node is in Zone 0, or other words my cluster that I'm restoring to is not using Availability Zones. You can certainly overcome this by creating a ConfigMap to map the original StorageClass to the new StorageClass if you need to.
+
+## Demo: Azure Container Registry geo-replication
+
