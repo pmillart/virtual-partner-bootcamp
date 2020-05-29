@@ -2,6 +2,7 @@
 
 - [Prerequisites](#prerequisites)
 - [Demo: Verifying node distribution](#demo-verifying-node-distribution)
+- [Demo: Backup and restore with Velero](#demo-backup-and-restore-with-velero)
 
 ## Prerequisites
 
@@ -136,6 +137,7 @@ az aks nodepool add \
 
 ## Demo: Backup and restore with Velero
 
+```sh
 TENANT_ID=...
 SUBSCRIPTION_ID=...
 SOURCE_AKS_RESOURCE_GROUP=MC_...
@@ -158,3 +160,4 @@ az storage account create \
    --name velero \
    --public-access off \
    --account-name $BACKUP_STORAGE_ACCOUNT_NAME
+```
