@@ -11,6 +11,7 @@ Pre-stage your environment with the following resource groups and resources.
 ```sh
 RESOURCE_GROUP="clusterZonesRG"
 REGION_NAME="eastus2"
+REGION_NAME2="eastus"
 AKS_RESOURCE="aksCluster"
 
 az group create \
@@ -59,6 +60,101 @@ az aks nodepool add \
     --node-count 2 \
     --node-taints pool=zonalpool:NoSchedule \
     --zones 1 3
+
+az aks create \
+    --resource-group $RESOURCE_GROUP \
+    --name "{$AKS_RESOURCE}2" \
+    --location $REGION_NAME2 \
+    --generate-ssh-keys \
+    --vm-set-type VirtualMachineScaleSets \
+    --load-balancer-sku standard \
+    --service-principal "${SP_ID}" \
+    --client-secret "${CLIENT_SECRET}"
+
+echo "Creating Velero backup"
+TENANT_ID=$(az account show --query "tenantId")
+SUBSCRIPTION_ID=$(az account show --query "id")
+SOURCE_AKS_RESOURCE_GROUP=$(az group list -o json | jq -r ".[] | select(.name | contains(\"MC_${RESOURCE_GROUP}_${AKS_RESOURCE}\")
+) | .name")
+TARGET_AKS_RESOURCE_GROUP=$(az group list -o json | jq -r ".[] | select(.name | contains(\"MC_${RESOURCE_GROUP}_${AKS_RESOURCE}2\")
+) | .name")
+BACKUP_RESOURCE_GROUP=$RESOURCE_GROUP
+BACKUP_STORAGE_ACCOUNT_NAME=velero$(uuidgen | cut -d '-' -f5 | tr '[A-Z]' '[a-z]')
+
+# Create Azure Storage Account
+az storage account create \
+  --name $BACKUP_STORAGE_ACCOUNT_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --sku Standard_GRS \
+  --encryption-services blob \
+  --https-only true \
+  --kind BlobStorage \
+  --access-tier Hot
+  
+ # Create Blob Container
+ az storage container create \
+   --name velero \
+   --public-access off \
+   --account-name $BACKUP_STORAGE_ACCOUNT_NAME
+
+# Create a Service Principal for RBAC
+VELERO_CLIENT_SECRET=`az ad sp create-for-rbac \
+  --name "${AKS_RESOURCE}Velero" \
+  --role "Contributor" \
+  --query 'password' \
+  -o tsv \
+  --scopes /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$BACKUP_RESOURCE_GROUP /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$SOURCE_AKS_RESOURCE_GROUP /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$TARGET_AKS_RESOURCE_GROUP`
+  
+VELERO_CLIENT_ID=`az ad sp list --display-name "${AKS_RESOURCE}Velero" --query '[0].appId' -o tsv`
+
+mkdir temp
+cd temp
+
+wget https://github.com/vmware-tanzu/velero/releases/download/v1.4.0/velero-v1.4.0-linux-amd64.tar.gz
+
+tar -xvf velero-v1.4.0-linux-amd64.tar.gz
+
+cd velero-v1.4.0-linux-amd64
+
+cat << EOF > ./credentials-velero-source
+AZURE_SUBSCRIPTION_ID=${SUBSCRIPTION_ID}
+AZURE_TENANT_ID=${TENANT_ID}
+AZURE_CLIENT_ID=${VELERO_CLIENT_ID}
+AZURE_CLIENT_SECRET=${VELERO_CLIENT_SECRET}
+AZURE_RESOURCE_GROUP=${SOURCE_AKS_RESOURCE_GROUP}
+AZURE_CLOUD_NAME=AzurePublicCloud
+EOF
+
+cat << EOF > ./credentials-velero-target
+AZURE_SUBSCRIPTION_ID=${SUBSCRIPTION_ID}
+AZURE_TENANT_ID=${TENANT_ID}
+AZURE_CLIENT_ID=${VELERO_CLIENT_ID}
+AZURE_CLIENT_SECRET=${VELERO_CLIENT_SECRET}
+AZURE_RESOURCE_GROUP=${TARGET_AKS_RESOURCE_GROUP}
+AZURE_CLOUD_NAME=AzurePublicCloud
+EOF
+
+az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_RESOURCE --overwrite-existing
+
+./velero install \
+  --provider azure \
+  --plugins velero/velero-plugin-for-microsoft-azure:v1.0.0 \
+  --bucket velero \
+  --secret-file ./credentials-velero-source \
+  --backup-location-config resourceGroup=$BACKUP_RESOURCE_GROUP,storageAccount=$BACKUP_STORAGE_ACCOUNT_NAME \
+  --snapshot-location-config apiTimeout=5m,resourceGroup=$BACKUP_RESOURCE_GROUP \
+  --wait
+
+az aks get-credentials --resource-group $RESOURCE_GROUP --name "${AKS_RESOURCE}2" --overwrite-existing
+
+./velero install \
+  --provider azure \
+  --plugins velero/velero-plugin-for-microsoft-azure:v1.0.0 \
+  --bucket velero \
+  --secret-file ./credentials-velero-target \
+  --backup-location-config resourceGroup=$BACKUP_RESOURCE_GROUP,storageAccount=$BACKUP_STORAGE_ACCOUNT_NAME \
+  --snapshot-location-config apiTimeout=5m,resourceGroup=$BACKUP_RESOURCE_GROUP \
+  --wait
 ```
 
 ## Demo: Verifying node distribution
@@ -137,27 +233,8 @@ az aks nodepool add \
 
 ## Demo: Backup and restore with Velero
 
-```sh
-TENANT_ID=...
-SUBSCRIPTION_ID=...
-SOURCE_AKS_RESOURCE_GROUP=MC_...
-TARGET_AKS_RESOURCE_GROUP=MC_... # (optional, if you want to migrate)
-BACKUP_RESOURCE_GROUP=backups
-BACKUP_STORAGE_ACCOUNT_NAME=velero$(uuidgen | cut -d '-' -f5 | tr '[A-Z]' '[a-z]')
+Prior to this, I already installed Velero and configured it to have access to both of my deployed clusters.
 
-# Create Azure Storage Account
-az storage account create \
-  --name $BACKUP_STORAGE_ACCOUNT_NAME \
-  --resource-group $RESOURCE_GROUP \
-  --sku Standard_GRS \
-  --encryption-services blob \
-  --https-only true \
-  --kind BlobStorage \
-  --access-tier Hot
-  
- # Create Blob Container
- az storage container create \
-   --name velero \
-   --public-access off \
-   --account-name $BACKUP_STORAGE_ACCOUNT_NAME
+```sh
+
 ```
