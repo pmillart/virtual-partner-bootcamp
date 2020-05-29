@@ -422,3 +422,87 @@ As you can see, my node is in Zone 0, or other words my cluster that I'm restori
 
 ## Demo: Azure Container Registry geo-replication
 
+Let's start by creating a new registry:
+
+```sh
+RESOURCE_GROUP="clusterZonesRG"
+REGION_NAME="eastus2"
+REGION_NAME2="eastus"
+ACR_NAME="acr$RANDOM"
+
+echo "Creating ACR $ACR_NAME..."
+az acr create \
+    --resource-group $RESOURCE_GROUP \
+    --location $REGION_NAME \
+    --name $ACR_NAME \
+    --admin-enabled true \
+    --sku Premium
+```
+
+Next, we'll enable replication:
+
+```sh
+az acr replication create \
+    --location $REGION_NAME2 \
+    --registry $ACR_NAME
+```
+
+And finally, we'll build and push an image to the registry. Note that I'm going to use ACR Build Tasks here - this eliminates some of those concerns about pushing images from Linux clients as the image is built directly in ACR:
+
+```sh
+git clone https://github.com/Azure-Samples/acr-helloworld.git
+cd acr-helloworld
+cd AcrHelloworld
+
+sed -i "s/<acrName>.azurecr.io/${ACR_NAME}.azurecr.io/g" Dockerfile
+
+cd ..
+
+az acr build --image acr-helloworld:v1 \
+    --registry $ACR_NAME \
+    --file AcrHelloworld/Dockerfile .
+```
+
+While this is building, let's hop over to the portal and take a look. Browse to the portal and show ACR and the Replications tab. Show how individual webhooks can be created for each replica.
+
+Next, deploy our container. I'm going to use ACI to do this quickly just so we can see it spin up and which replica we pull from.
+
+Create a new ACI called replicacontainer and make sure it has a DNS name.
+
+```sh
+ACR_LOGIN_SERVER=$(az acr show --name $ACR_NAME \
+    --resource-group $RESOURCE_GROUP \
+    --query "loginServer" --output tsv)
+ACR_USER_NAME="00000000-0000-0000-0000-000000000000"
+ACR_PASSWORD=$(az acr login -n $ACR_NAME --expose-token --query "accessToken" -o tsv)
+
+echo "Creating container replicacontainer-1...";
+az container create \
+    --name "replicacontainer-1" \
+    --resource-group $RESOURCE_GROUP \
+    --location $REGION_NAME \
+    --image $ACR_LOGIN_SERVER/acr-helloworld:v1 \
+    --registry-login-server $ACR_LOGIN_SERVER \
+    --registry-username $ACR_USER_NAME \
+    --registry-password $ACR_PASSWORD \
+    --dns-name-label replicacontainer-$RANDOM \
+    --query ipAddress.fqdn
+
+echo "Creating container replicacontainer-2...";
+az container create \
+    --name "replicacontainer-2" \
+    --resource-group $RESOURCE_GROUP \
+    --location $REGION_NAME2 \
+    --image $ACR_LOGIN_SERVER/acr-helloworld:v1 \
+    --registry-login-server $ACR_LOGIN_SERVER \
+    --registry-username $ACR_USER_NAME \
+    --registry-password $ACR_PASSWORD \
+    --dns-name-label replicacontainer-$RANDOM \
+    --query ipAddress.fqdn
+```
+
+We can look up the same details ourselves from our clients using nslookup or dig.
+
+```sh
+dig $ACR_NAME.azurecr.io
+```
