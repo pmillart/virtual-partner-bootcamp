@@ -259,9 +259,7 @@ Two additional Azure Subscriptions have trusted relationships with that same M36
 Contoso uses Dynamics for their entire front operations including CRM and ERP functions as well as running an e-commerce purchase path directly through Dynamics.    
 
 **Data Storage**
-All of their operations, analytics and reporting datastores are on Azure SQL Database:
-
-In![image info](./images/ADDeployment.png)
+Contoso has migrated all of their operations, analytics and reporting datastores are on Azure SQL Database:
 
 Given the environment, there are three valid authentication scenarios:  
 •	B2B - DIY Retail Consumers should be able to use the ecommerce purchase path to purchase solar components with an anonymous cart purchase path.   Or they can create a persistent account with Contoso, using an email as username or using a social login from a valid Identity Provider, and save payment methods and view order status and order history along with sharing other social details if they desire.   This method gives them access to pre- and post- sales technical support as well as event and blog content.  
@@ -534,7 +532,7 @@ Client applications of various different configurations will be required to auth
 
 The solution provides a wide range of benefits by using Microsoft's Identity Platform (MIP) to provide a unified identity model that spans on-prem, cloud, and PaaS security requirements and brings them into a unified space using a cogent enterprise-ready platform.     
 
-**Overveiw of a MIP here**
+**Overview of a MIP here**
 In![image info](./images/MIPOverview.png)  
 
 The major effort is to refactor all custom application authentication and authorization workflows into the unified approach by using MIP as the primary authentication (AuthN) and authorization (AuthZ) endpoint for the entire organization.   This effort encapsulates and extends the current AuthN/AuthZ capabilities by adhering to the following architectural guidelines:
@@ -639,7 +637,12 @@ On response, depending on the workflow MIP will return an access token, or an id
 using a client library for audience, issuer, as well as time window (nbf, and expiry) to ensure that the token is meant for the requester.   Any unique identifiers used within the application from 
 the token payload must be immutable so relying on OID or SUB is preferred mostly because UPN and email can change within the organization AAD tree.  
 
-In![image info](./images/SampleAuthenticationFlow.png)  
+**MIPS User Authentication Example**
+In![image info](./images/MIPSampleUserAuthenticationFlow.png)  
+
+**On-Behalf-Of (OBO) Scenarios**
+In addition, MIP supports OAuth On-Behalf-Of (OBO) Scenarios where a service authenticates with another service on behalf of the user. 
+In![image info](./images/MIPSampleOBOAuthenticationFlow.png)  
 
 **Example of a “Identity Token” here **
 In![image info](./images/ExampleIdentityToken.png)  
