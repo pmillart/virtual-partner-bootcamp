@@ -71,15 +71,16 @@ az aks create \
     --generate-ssh-keys \
     --vm-set-type VirtualMachineScaleSets \
     --load-balancer-sku standard \
+    --node-count 1 \
     --service-principal "${SP_ID}" \
     --client-secret "${CLIENT_SECRET}"
 
 echo "Creating Velero backup"
 TENANT_ID=$(az account show --query "tenantId" | sed -r "s/\\\"//g")
 SUBSCRIPTION_ID=$(az account show --query "id" | sed -r "s/\\\"//g")
-SOURCE_AKS_RESOURCE_GROUP=$(az group list -o json | jq -r ".[] | select(.name | contains(\"MC_${RESOURCE_GROUP}_${AKS_RESOURCE}\")
+SOURCE_AKS_RESOURCE_GROUP=$(az group list -o json | jq -r ".[] | select(.name | contains(\"MC_${RESOURCE_GROUP}_${AKS_RESOURCE}_${REGION_NAME}\")
 ) | .name")
-TARGET_AKS_RESOURCE_GROUP=$(az group list -o json | jq -r ".[] | select(.name | contains(\"MC_${RESOURCE_GROUP}_${AKS_RESOURCE}2\")
+TARGET_AKS_RESOURCE_GROUP=$(az group list -o json | jq -r ".[] | select(.name | contains(\"MC_${RESOURCE_GROUP}_${AKS_RESOURCE}2_${REGION_NAME2}\")
 ) | .name")
 BACKUP_RESOURCE_GROUP=$RESOURCE_GROUP
 BACKUP_STORAGE_ACCOUNT_NAME=velero$(uuidgen | cut -d '-' -f5 | tr '[A-Z]' '[a-z]')
@@ -247,11 +248,24 @@ echo "Installing Velero to cluster ${AKS_RESOURCE}2..."
     kubectl get pods -l app=nginx -o wide
     ```
 
+7. As you can see, my pods even deployed across my five available nodes in my default node pool. Let's increase the number of replicas:
+
+    ```sh
+    kubectl scale --replicas=8 deployments/nginx-deployment
+    kubectl get pods -l app=nginx -o wide
+    ```
+
+8. Why didn't the pods cross to my zonalpool? Well, because I have tainted the pool members:
+
+    ```sh
+    kubectl get nodes -o json | jq -r ".items[].spec.taints"
+    ```
+
 ## Demo: Backup and restore with Velero
 
 Prior to this, I already installed Velero and configured it to have access to both of my deployed clusters.
 
-Let's create some basic infrastructure, deploying new namespace and, a persistent volume that we can service some HTML from through NGINX, and deploy NGINX.
+Let's create some basic infrastructure, deploying new a namespace and, a persistent volume that we can service some HTML from through NGINX, and deploy NGINX.
 
 Save the following and call it `nginx-stateful.yaml`:
 
@@ -259,7 +273,7 @@ Save the following and call it `nginx-stateful.yaml`:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: velero
+  name: velero-test
   
 ---
 
@@ -267,7 +281,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: nginx-pvc
-  namespace: velero
+  namespace: velero-test
 spec:
   accessModes:
   - ReadWriteOnce
@@ -281,11 +295,11 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  namespace: velero
+  namespace: velero-test
   name: nginx
   labels:
     app: nginx
-    environment: velero
+    environment: velero-test
 spec:
   containers:
   - image: nginx
@@ -314,11 +328,11 @@ kind: Service
 apiVersion: v1
 metadata:
   name:  nginx
-  namespace: velero
+  namespace: velero-test
 spec:
   selector:
     app: nginx
-    environment: velero
+    environment: velero-test
   type:  LoadBalancer
   ports:
   - port:  80
@@ -328,7 +342,7 @@ spec:
 Now apply it:
 
 ```sh
-kubectl apply -f .\nginx-stateful.yaml
+kubectl apply -f nginx-stateful.yaml
 ```
 
 Now let's create a quick HTML file we can store in the persistent volume:
@@ -337,10 +351,70 @@ Now let's create a quick HTML file we can store in the persistent volume:
 cat << EOF > ./index.html
 <!DOCTYPE html>
 <html>
-<body style="background-color:blue;">
-<font size="24">We are testing Velero backups for Kubernetes!</font>
-<font size="24"><marquee>http://sysadminas.eu</marquee></font>
+<body style="background-color:white;">
+<font size="24">Let's test persistent volume backup and restore!</font>
 </body>
 </html>
 EOF
 ```
+
+Now let's copy the file in:
+
+```sh
+kubectl cp index.html velero/nginx:/usr/share/nginx/html/
+```
+
+And then get our services to find the IP:
+
+```sh
+kubectl get services -n velero-test
+```
+
+Now we can create a backup:
+
+```sh
+./velero backup create velero-backup --include-namespaces velero-test
+```
+
+And we can check our backup state:
+
+```sh
+./velero backup describe velero-backup
+```
+
+If we browse to the resource group where our backup storage resides, we can see a snapshot of the persistent disk has been created.
+
+Now let's connect to our 2nd cluster to restore the backup:
+
+```sh
+RESOURCE_GROUP="clusterZonesRG"
+AKS_RESOURCE="aksCluster"
+az aks get-credentials --resource-group $RESOURCE_GROUP --name "${AKS_RESOURCE}2" --overwrite-existing
+```
+
+And then let's restore:
+
+```sh
+./velero restore create --from-backup velero-backup
+```
+
+Let's make sure our pods came up:
+
+```sh
+kubectl get pods,deployments,services -n velero-test
+```
+
+And if we browse to the IP, we can see that our app has been restored. Or not... Why didn't our pod come up?
+
+```sh
+kubectl describe pv $(kubectl get pvc -o json -n velero-test | jq -r ".items[].spec.volumeName")
+```
+
+We can see our pod came up in Zone 2, but let's take a look at our nodes:
+
+```sh
+kubectl get nodes -o json | \
+    jq -r '.items[].metadata.labels | {nodename:.agentpool,nodezone:.["failure-domain.beta.kubernetes.io/zone"]}'
+```
+
+As you can see, my node is in Zone 0, or other words my cluster that I'm restoring to is not using Availability Zones. You can certainly overcome this by creating a ConfigMap to map the original StorageClass to the new StorageClass if you need to.
