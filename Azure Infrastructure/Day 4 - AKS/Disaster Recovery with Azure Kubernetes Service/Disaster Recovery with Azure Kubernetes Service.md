@@ -41,6 +41,7 @@ SP_ID=$(az ad sp show --id "http://$SP_NAME" -o json | jq -r .appId)
 echo "SP_ID: ${SP_ID}"
 
 # Create a cluster with zonal support
+echo "Creating cluster $AKS_RESOURCE in $REGION_NAME..."
 az aks create \
     --resource-group $RESOURCE_GROUP \
     --name $AKS_RESOURCE \
@@ -52,6 +53,7 @@ az aks create \
     --node-count 5 \
     --zones 1 2 3
 
+echo "Adding node pool zonalpool to cluster $AKS_RESOURCE..."
 az aks nodepool add \
     --cluster-name $AKS_RESOURCE \
     --name zonalpool \
@@ -61,9 +63,10 @@ az aks nodepool add \
     --node-taints pool=zonalpool:NoSchedule \
     --zones 1 3
 
+echo "Creating cluster ${AKS_RESOURCE}2 in $REGION_NAME2..."
 az aks create \
     --resource-group $RESOURCE_GROUP \
-    --name "{$AKS_RESOURCE}2" \
+    --name "${AKS_RESOURCE}2" \
     --location $REGION_NAME2 \
     --generate-ssh-keys \
     --vm-set-type VirtualMachineScaleSets \
@@ -72,8 +75,8 @@ az aks create \
     --client-secret "${CLIENT_SECRET}"
 
 echo "Creating Velero backup"
-TENANT_ID=$(az account show --query "tenantId")
-SUBSCRIPTION_ID=$(az account show --query "id")
+TENANT_ID=$(az account show --query "tenantId" | sed -r "s/\\\"//g")
+SUBSCRIPTION_ID=$(az account show --query "id" | sed -r "s/\\\"//g")
 SOURCE_AKS_RESOURCE_GROUP=$(az group list -o json | jq -r ".[] | select(.name | contains(\"MC_${RESOURCE_GROUP}_${AKS_RESOURCE}\")
 ) | .name")
 TARGET_AKS_RESOURCE_GROUP=$(az group list -o json | jq -r ".[] | select(.name | contains(\"MC_${RESOURCE_GROUP}_${AKS_RESOURCE}2\")
@@ -82,6 +85,7 @@ BACKUP_RESOURCE_GROUP=$RESOURCE_GROUP
 BACKUP_STORAGE_ACCOUNT_NAME=velero$(uuidgen | cut -d '-' -f5 | tr '[A-Z]' '[a-z]')
 
 # Create Azure Storage Account
+echo "Creating storage account $BACKUP_STORAGE_ACCOUNT_NAME..."
 az storage account create \
   --name $BACKUP_STORAGE_ACCOUNT_NAME \
   --resource-group $RESOURCE_GROUP \
@@ -90,8 +94,12 @@ az storage account create \
   --https-only true \
   --kind BlobStorage \
   --access-tier Hot
+
+echo "Created storage account $BACKUP_STORAGE_ACCOUNT_NAME. Sleep for 2 minutes while it finishes..."
+sleep 120
   
  # Create Blob Container
+ echo "Creating container..."
  az storage container create \
    --name velero \
    --public-access off \
@@ -104,9 +112,12 @@ VELERO_CLIENT_SECRET=`az ad sp create-for-rbac \
   --query 'password' \
   -o tsv \
   --scopes /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$BACKUP_RESOURCE_GROUP /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$SOURCE_AKS_RESOURCE_GROUP /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$TARGET_AKS_RESOURCE_GROUP`
-  
-VELERO_CLIENT_ID=`az ad sp list --display-name "${AKS_RESOURCE}Velero" --query '[0].appId' -o tsv`
+echo "VELERO_CLIENT_SECRET: $VELERO_CLIENT_SECRET"
 
+VELERO_CLIENT_ID=`az ad sp list --display-name "${AKS_RESOURCE}Velero" --query '[0].appId' -o tsv`
+echo "VELERO_CLIENT_ID: $VELERO_CLIENT_ID"
+
+echo "Download and extract Velero client..."
 mkdir temp
 cd temp
 
@@ -116,6 +127,7 @@ tar -xvf velero-v1.4.0-linux-amd64.tar.gz
 
 cd velero-v1.4.0-linux-amd64
 
+echo "Creating credential files..."
 cat << EOF > ./credentials-velero-source
 AZURE_SUBSCRIPTION_ID=${SUBSCRIPTION_ID}
 AZURE_TENANT_ID=${TENANT_ID}
@@ -134,8 +146,10 @@ AZURE_RESOURCE_GROUP=${TARGET_AKS_RESOURCE_GROUP}
 AZURE_CLOUD_NAME=AzurePublicCloud
 EOF
 
+echo "Retrieve credentials for cluster $AKS_RESOURCE..."
 az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_RESOURCE --overwrite-existing
 
+echo "Installing Velero to cluster $AKS_RESOURCE..."
 ./velero install \
   --provider azure \
   --plugins velero/velero-plugin-for-microsoft-azure:v1.0.0 \
@@ -145,8 +159,10 @@ az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_RESOURCE --o
   --snapshot-location-config apiTimeout=5m,resourceGroup=$BACKUP_RESOURCE_GROUP \
   --wait
 
+echo "Retrieve credentials for cluster ${AKS_RESOURCE}2..."
 az aks get-credentials --resource-group $RESOURCE_GROUP --name "${AKS_RESOURCE}2" --overwrite-existing
 
+echo "Installing Velero to cluster ${AKS_RESOURCE}2..."
 ./velero install \
   --provider azure \
   --plugins velero/velero-plugin-for-microsoft-azure:v1.0.0 \
@@ -235,6 +251,96 @@ az aks get-credentials --resource-group $RESOURCE_GROUP --name "${AKS_RESOURCE}2
 
 Prior to this, I already installed Velero and configured it to have access to both of my deployed clusters.
 
-```sh
+Let's create some basic infrastructure, deploying new namespace and, a persistent volume that we can service some HTML from through NGINX, and deploy NGINX.
 
+Save the following and call it `nginx-stateful.yaml`:
+
+```sh
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: velero
+  
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-pvc
+  namespace: velero
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: default
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: velero
+  name: nginx
+  labels:
+    app: nginx
+    environment: velero
+spec:
+  containers:
+  - image: nginx
+    name: nginx
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+    volumeMounts:
+    - mountPath: "/usr/share/nginx/html"
+      name: volume
+    ports:
+    - containerPort: 80
+      protocol: TCP
+  volumes:
+    - name: volume
+      persistentVolumeClaim:
+        claimName: nginx-pvc  
+  
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name:  nginx
+  namespace: velero
+spec:
+  selector:
+    app: nginx
+    environment: velero
+  type:  LoadBalancer
+  ports:
+  - port:  80
+    targetPort:  80
+```
+
+Now apply it:
+
+```sh
+kubectl apply -f .\nginx-stateful.yaml
+```
+
+Now let's create a quick HTML file we can store in the persistent volume:
+
+```sh
+cat << EOF > ./index.html
+<!DOCTYPE html>
+<html>
+<body style="background-color:blue;">
+<font size="24">We are testing Velero backups for Kubernetes!</font>
+<font size="24"><marquee>http://sysadminas.eu</marquee></font>
+</body>
+</html>
+EOF
 ```
