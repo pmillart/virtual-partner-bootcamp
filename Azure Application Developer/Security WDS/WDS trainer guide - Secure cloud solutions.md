@@ -404,6 +404,7 @@ Locking down a Secure Cloud Application Strategy is the primary concern right no
 |----------|:-------------:|
 | **Description** | **Links** |
 | Azure SQL Database TDE (BYOK)         | <https://docs.microsoft.com/en-us/azure/azure-sql/database/transparent-data-encryption-byok-configure> |
+|TDE BYOK Process Overview |<https://docs.microsoft.com/en-us/azure/azure-sql/database/transparent-data-encryption-byok-overview>|
 | Azure SQL Database Always Encrypted   | <https://docs.microsoft.com/en-us/azure/azure-sql/database/always-encrypted-certificate-store-configure> |
 | Azure SQL Database AE Colum Master Key Overview |<https://docs.microsoft.com/en-us/sql/relational-databases/security/encryption/overview-of-key-management-for-always-encrypted>|
 | Azure SQL Database AE Column Master Key Management| <https://docs.microsoft.com/en-us/sql/relational-databases/security/encryption/create-and-store-column-master-keys-always-encrypted> |
@@ -655,14 +656,42 @@ For a smaller company like Contoso it is more advantageous to let Azure manage C
 
 **How would you design a solution where credential master keys (CMK) for data encrption, were managed by a regulated team such as in BYOK scenarios?** 
 
-**Goal:**  Provide a secure solution for Self-managed credential master keys using Azure including describing key rotation and replacement.  
+**Goal:**  Provide a secure solution for Self-managed credential master keys using Azure including describing key rotation and replacement for both AE and TDE.
 
-**BYOK**
+**Self-Managed Keys or BYOK**
+
+For self-managed CMK processes, the certificate key can be stored in an instance of Azure Key Vault within the same subscription.   Since Contoso uses Azure SQL Database it is important to note that key placement is at the Server-Level only.  Individual database level support for this feature is not available at this time.   Also Allow Trusted Microsoft Services must be enabled at the Server-Level.
+
+Consider also that for most organizations with a mature InfoSec Policy, the policy requires a declarative separation of duties related to segmenation of who does what within the organization so no one individual can place keys and configuration.  In diagram below, you can see that the DBA and Security, and Audit roles are maintained by different individuals within the organization. Policies like this are often implemented to prevent active "threats from within" which is a legitimate concern that is, frankly, overlooked. 
+
+![image info](./images/SelfManagedKeys.png)
+
+**AKV Configuration Requirements**
+Key vault and SQL Database/managed instance must belong to the same Azure Active Directory tenant as cross-tenant interactions are not supported.  In the case of BYOK, the actual database server instance is granted access to the AKV instance using the services managed identity.   
+
+**Enable AKV Soft-Delete!**
+AKV must have Soft-delete enabled to ensure protection from complete key loss.  Soft-delete is default off, and it is important to note that the feature requires specific permissions and can only be enabled by Azure CLI or Azure PS interaction.   Soft-deleted values are retained for 90 days. The recover and purge actions have their own permissions associated in a key vault access policy. 
+
+**TDE Protector Requirements**
+TDE protector supports key lenghts of 2048 and 3072 bytes, and supports the following key types:
+- Asymmetric
+- RSA
+- RSA HSM 
+
+AKV supports the following import key types for existing keys: 
+- .pfx 
+- .byok
+- .backup
+
+**AE Requirements**
 
 
-**Key Rotation**
+For Contoso, it is important to keep in mind that TDE keys are intrinsic to some HADR like cross-region Auto-Failover and Geo-replication configurations as the same key must be applied to all instances within the configuration.  
 
+**TDE and AE Key Rotation**
+Key rotation cannot be accomplished via Azure Portal - can be done using TSQL, Azure Powershell, and Azure CLI.   Be sure to understand the documentation on this prior to implementation. 
 
+For Contoso, it is important to keep in mind that AE and TDE keys are intrinsic to HADR and backup/restore operations as well so old keys should be archived using AKV versioning to ensure access to backups.   
 
 **How would you control access to data, cloud resources, and LOB applications within the organization as well as reducing authorization management overhead?**
 
@@ -744,11 +773,23 @@ All web-based applications use secure protocol configurations regardless of whet
 
 **What methods can be used to abstract application secrets away from application configuration during development and deployment?**
 
-Part of Contoso's requirements is to encapsulate sensitive configuration data 
+Part of Contoso's requirements is to encapsulate sensitive configuration data away from application configuration.  
 
+This can be accomplished by storing sensitive configuration information in Azure Key Vault and registering the application with Azure AD.  After registration, the application can use its client id and authentication key to connect to Azure Key Vault (AKV) using the Microsoft Managed Identity.   
 
+For context, consider this image from Microsoft: 
 
+![image info](./images/ApptoAKVAccess.png)
 
+Once this configuration is set up, applications can then query an AKV instance using pre-built client libraries configured to send secured requests to the AKV REST API under the security context of the aforementioned managed identity.   
+
+It is recommended to set up an AKV instance for each major subscription in your build chain to reflect the environments used to deploy.   For Contoso, a vault would be configured for Development (covering Dev and Test), and another instance for Production (covering Stage, and Production).   
+
+AKV can store different versions of a key/secret pair as well making key rotations and versioning easy.  For certificate storage, Azure Key Vault can manage  manage certificate life cycles from certificate origination and key rotation events. 
+
+Azure Key Vault is an effective solution for managing secrets in the cloud and in addition to storing application secrets, it can also sensitive keys and certificates for other entities and applications within the enterprise - like for BYOK scenarios related to Azure SQL Database, for instance.  
+
+One additional thing:  AKV offers complete logging features through portal that can be routed to Azure Monitor and also to raw output to protected storage accounts for downstream auditing efforts.   
 
 **What refactoring is required for custom applications to use the unified identity strategy?**
 Any API secured using  Microsoft Identity Platform(MIP) is first registered with MIP which essentially registeres the Application with AAD.  After registratio the application will request 
