@@ -26,22 +26,19 @@ Microsoft and the trademarks listed at <https://www.microsoft.com/legal/intellec
 
 <!-- TOC -->
 
-- [Secure cloud solution whiteboard design session student guide](#secure-cloud-solution-whiteboard-design-session-student-guide)
-  - [Abstract and learning objectives](#abstract-and-learning-objectives)
-  - [Step 1: Review the customer case study](#step-1-review-the-customer-case-study)
-    - [Customer situation](#customer-situation)
-  - [Customer Requirements](#customer-requirements)
-      - [Provide Unified Identity Provisioning, Management, and Login](#provide-unified-identity-provisioning-management-and-login)
-      - [Utilize Approrpriate Configuration and Access Control Using Identity Roles](#utilize-approrpriate-configuration-and-access-control-using-identity-roles)
-      - [Ensure Data Encryption - AT ALL TIMES (at rest and in motion)](#ensure-data-encryption---at-all-times-at-rest-and-in-motion)
-      - [Provide Robust Application Security](#provide-robust-application-security)
-      - [Contoso Development Team Characteristics](#contoso-development-team-characteristics)
-    - [Customer objections](#customer-objections)
+- [Secure Cloud Solution Whiteboard Design Session Student Guide](#secure-cloud-solution-whiteboard-design-session-student-guide)
+  - [Abstract and Learning Objectives](#abstract-and-learning-objectives)
+  - [Step 1: Review the Customer Case Study](#step-1-review-the-customer-case-study)
+    - [Customer Situation](#customer-situation)
+    - [Customer Requirements](#customer-requirements)
+    - [Customer Objections](#customer-objections)
+    - [Key Design Considerations](#key-design-considerations)
     - [Infographic for common scenarios](#infographic-for-common-scenarios)
-  - [Step 2: Design a proof of concept solution](#step-2-design-a-proof-of-concept-solution)
-  - [Step 3: Present the solution](#step-3-present-the-solution)
+- [INFOGRAPHIC HERE](#infographic-here)
+  - [Step 2: Design a Solution](#step-2-design-a-solution)
+  - [Step 3: Present the Solution](#step-3-present-the-solution)
   - [Wrap-up](#wrap-up)
-  - [Additional references UPDATE LINKS](#additional-references-update-links)
+  - [Additional references](#additional-references)
 
 <!-- /TOC -->
 
@@ -83,11 +80,11 @@ Contoso now has most of their key line of business applications, data storage, a
 
 According to Chief Information Officer (CIO) Jessica Sams, Contoso's main concern is providing **robust application security** for it's own suppliers and customers while also providing an easy online experience for them. Contoso currently manages authentication via Azure Active Directory but wants to reconfigure to support a more robust solution for 3 major user experiences:
 
-* **B2B** - Solar Manufacturer/Providers, including professional technical contributors such as: architectural, engineering, and regulatory/legal advisors from state and local entities.   One key workflow partner of this group is Contoso's own Commercial and Residential professional installer teams as there is heavy cross-team interaction during execution of project installations.  
+- **B2B** - Solar Manufacturer/Providers, including professional technical contributors such as: architectural, engineering, and regulatory/legal advisors from state and local entities.   One key workflow partner of this group is Contoso's own Commercial and Residential professional installer teams as there is heavy cross-team, cross-corporate interaction during execution of project installations.  
 
-* **B2C** - DYI Consumers purchasing components and services directly - either wholesale or retail, and/or opting in persistent account access enabling consumer access to extended offerings provided by Contoso Consumer Services including pre- and post- sales technical support, blog access, and access to technical events sponsored by the industry
+- **B2C** - DYI Consumers purchasing components and services directly - either wholesale or retail, and/or opting in persistent account access enabling consumer access to extended offerings provided by Contoso Consumer Services including pre- and post- sales technical support, blog access, and access to technical events sponsored by the industry
 
-* **OPS** - Internal employee groups such as C-Suite, HR, IT, Fulfillment, Installation Teams, Partner and Consumer Services, Sales and Marketing
+- **OPS** - Internal employee groups such as C-Suite, HR, IT, Fulfillment, Installation Teams, Partner and Consumer Services, Sales and Marketing
 
 With these use cases and the addtion of new infrastructure, locations, and employees, Contoso needs a solution that will provide reliable authentication but in addition, they require robust account management functionality, as well as the ability to secure and audit application configuration, and integration events. 
 
@@ -139,9 +136,11 @@ All of their operations, analytics and reporting datastores are on Azure SQL Dat
 In![image info](./images/ADDeployment.png)
 
 Given the environment, there are three valid authentication scenarios:  
-•	B2B - DIY Retail Consumers should be able to use the ecommerce purchase path to purchase solar components with an anonymous cart purchase path.   Or they can create a persistent account with Contoso, using an email as username or using a social login from a valid Identity Provider, and save payment methods and view order status and order history along with sharing other social details if they desire.   This method gives them access to pre- and post- sales technical support as well as event and blog content.  
-•	B2C - DIY Retail Consumers should be able to use the ecommerce purchase path to purchase solar components with an anonymous cart purchase path.   Or they can create a persistent account with Contoso, using an email as username or using a social login from a valid Identity Provider, and save payment methods and view order status and order history along with sharing other social details if they desire.   This method gives them access to pre- and post- sales technical support as well as event and blog content.  
-•	OPS - Existing and New internal employees should be able to login with their assigned Active Directory Work Account from any valid secure location on any approved device.  Optionally this authentication flow may require multi-factor authorization (MFA).   Once authenticated, the user will experience single sign-on (SSO) behavior across enterprise applications and endpoints until they fully log out.
+- **B2B** - Partner Manufacturer/Suppliers should be able authenticate on invitation to Contoso's identity management using their work credentials via a guest configuration with Contoso's M365 tenant.   This will allow partners to authenticate and be authorized to interact with Contoso's application platforms as required either through direct Web or API interaction or via M365 UX, or perhaps even via Azure AD Application Proxy for older apps supporting SAML only.  
+
+- **B2C** - DIY Retail Consumers should be able to use the ecommerce purchase path to purchase solar components with an anonymous cart purchase path.   Or they can create a persistent account with Contoso, using an email as username or using a social login from a valid Identity Provider, and save payment methods and view order status and order history along with sharing other social details if they desire.   This method gives them access to pre- and post- sales technical support as well as event and blog content.  
+
+- **OPS** - Existing and New internal employees should be able to login with their assigned Active Directory Work Account from any valid secure location on any approved device.  Optionally this authentication flow may require multi-factor authorization (MFA).   Once authenticated, the user will experience single sign-on (SSO) behavior across enterprise applications and endpoints until they fully log out.
 
 **Goal:** Provide an enterprise-ready solution to unify user and service account authentication, authorization, and management (provisioning).   This goal is essentially the foundational core of all the other requirements as it defines the identity management for users, LOB applications, and custom applications such as web apps, apis, service apps.  
 

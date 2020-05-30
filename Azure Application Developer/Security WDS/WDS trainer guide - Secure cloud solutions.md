@@ -34,12 +34,11 @@ Microsoft and the trademarks listed at <https://www.microsoft.com/en-us/legal/in
 - [Secure Cloud Solution Whiteboard Design Session Student Guide](#secure-cloud-solution-whiteboard-design-session-student-guide)
   - [Abstract and Learning Objectives](#abstract-and-learning-objectives)
   - [Step 1: Review the Customer Case Study](#step-1-review-the-customer-case-study)
-    - [Customer Scenario](#customer-scenario)
+    - [Customer Situation](#customer-situation)
     - [Customer Requirements](#customer-requirements)
     - [Customer Objections](#customer-objections)
     - [Key Design Considerations](#key-design-considerations)
-    - [Infographic for common scenarios](#infographic-for-common-scenarios)
-- [INFOGRAPHIC HERE](#infographic-here)
+    - [Contoso Current High-level Architecture](#contoso-current-high-level-architecture)
   - [Step 2: Design a Solution](#step-2-design-a-solution)
   - [Step 3: Present the Solution](#step-3-present-the-solution)
   - [Wrap-up](#wrap-up)
@@ -52,8 +51,7 @@ Microsoft and the trademarks listed at <https://www.microsoft.com/en-us/legal/in
   - [Preferred target audience](#preferred-target-audience)
   - [Preferred solution](#preferred-solution)
     - [Requirement Summary](#requirement-summary)
-- [DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG](#dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug)
-- [DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG DBUG](#dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-dbug-1)
+  - [Preferred Solution](#preferred-solution-1)
   - [Customer quote (to be read back to the attendees at the end)](#customer-quote-to-be-read-back-to-the-attendees-at-the-end)
 
 <!-- /TOC -->
@@ -262,9 +260,11 @@ Contoso uses Dynamics for their entire front operations including CRM and ERP fu
 Contoso has migrated all of their operations, analytics and reporting datastores are on Azure SQL Database:
 
 Given the environment, there are three valid authentication scenarios:  
-•	B2B - DIY Retail Consumers should be able to use the ecommerce purchase path to purchase solar components with an anonymous cart purchase path.   Or they can create a persistent account with Contoso, using an email as username or using a social login from a valid Identity Provider, and save payment methods and view order status and order history along with sharing other social details if they desire.   This method gives them access to pre- and post- sales technical support as well as event and blog content.  
-•	B2C - DIY Retail Consumers should be able to use the ecommerce purchase path to purchase solar components with an anonymous cart purchase path.   Or they can create a persistent account with Contoso, using an email as username or using a social login from a valid Identity Provider, and save payment methods and view order status and order history along with sharing other social details if they desire.   This method gives them access to pre- and post- sales technical support as well as event and blog content.  
-•	OPS - Existing and New internal employees should be able to login with their assigned Active Directory Work Account from any valid secure location on any approved device.  Optionally this authentication flow may require multi-factor authorization (MFA).   Once authenticated, the user will experience single sign-on (SSO) behavior across enterprise applications and endpoints until they fully log out.
+- **B2B** - Partner Manufacturer/Suppliers should be able authenticate on invitation to Contoso's identity management using their work credentials via a guest configuration with Contoso's M365 tenant.   This will allow partners to authenticate and be authorized to interact with Contoso's application platforms as required either through direct Web or API interaction or via M365 UX, or perhaps even via Azure AD Application Proxy for older apps supporting SAML only.  
+
+- **B2C** - DIY Retail Consumers should be able to use the ecommerce purchase path to purchase solar components with an anonymous cart purchase path.   Or they can create a persistent account with Contoso, using an email as username or using a social login from a valid Identity Provider, and save payment methods and view order status and order history along with sharing other social details if they desire.   This method gives them access to pre- and post- sales technical support as well as event and blog content.  
+
+- **OPS** - Existing and New internal employees should be able to login with their assigned Active Directory Work Account from any valid secure location on any approved device.  Optionally this authentication flow may require multi-factor authorization (MFA).   Once authenticated, the user will experience single sign-on (SSO) behavior across enterprise applications and endpoints until they fully log out.
 
 **Goal:** Provide an enterprise-ready solution to unify user and service account authentication, authorization, and management (provisioning).   This goal is essentially the foundational core of all the other requirements as it defines the identity management for users, LOB applications, and custom applications such as web apps, apis, service apps.  
 
@@ -319,7 +319,7 @@ Using a dedicated, secure pipeline build tool-chain as the official deployment s
 
 ### Customer Objections
 
-1. We are concerned that the  addition of other AAD instances to support B2C and B2B guests will require us to recreate all of our accounts and reassign permissions
+1. We are concerned that the addition of other AAD instances to support B2C and B2B guests will require us to recreate all of our accounts and reassign permissions
 2. We are worried about applying RBAC because in the past it has been hard to ensure people get the right access
 3. The Development Team is concerned that further constraining releases will slow down development 
 4. The Development Team is also worried about the depth of refactoring required to ensure custom apps can verify actions to roles 
@@ -343,10 +343,8 @@ In terms of Secure Cloud Application requirements, a few things are clear:
 
 Locking down a Secure Cloud Application Strategy is the primary concern right now however, Contoso is growing - fast - so consideration for scale and performance should be included during design.
 
-### Infographic for common scenarios
-
-# INFOGRAPHIC HERE
-In![image info](./images/ContosoReferenceArchitecture.png)  
+### Contoso Current High-level Architecture
+![image info](./images/ContosoHighlevelSecurity.png)  
 
 ## Step 2: Design a Solution 
 
@@ -358,9 +356,12 @@ In![image info](./images/ContosoReferenceArchitecture.png)
 
 - **What customer business needs do you need to address with your solution?**
 - **How would you design a Unified Identity Solution for Contoso that includes Contoso partners and customers?**
+- **What are some methods to effectively migrate users for both the External Partners and Customers from existing user stores into the new Unified Identity Solution?**
 - **How would you ensure data is encryption across the full stack for Contoso?** 
+- **How would you design a solution where credential master keys (CMK) for data encrption, were managed by a regulated team such as in BYOK scenarios?** 
 - **How would you control access to data, cloud resources, and LOB applications within the organization as well as reducing authorization management overhead?**
 - **How would you ensure robust application security design across all stages of development from POC to deployment in Production?**
+- **What methods can be used to abstract application secrets away from application configuration during development and deployment?**
 - **What refactoring is required for custom applications to use the unified identity strategy?**
 - **Who is your target audience and who are the decision makers within the organization?**
 - **Who should you present this solution to?**
@@ -419,6 +420,9 @@ In![image info](./images/ContosoReferenceArchitecture.png)
 | Azure Active Directory B2B documentation | <https://docs.microsoft.com/en-us/azure/active-directory/b2b/>  |
 | Azure Active Directory B2C Technical Overview|<https://docs.microsoft.com/en-us/azure/active-directory-b2c/technical-overview>|
 | Azure Active Directory B2C documentation | <https://docs.microsoft.com/en-us/azure/active-directory-b2c/>  |
+| Azure Active Directoyr B2C User Migration |<https://docs.microsoft.com/en-us/azure/active-directory-b2c/user-migration>|
+| Manage Azure AD B2C User Accounts with Microsoft Graph |<https://docs.microsoft.com/en-us/azure/active-directory-b2c/manage-user-accounts-graph-api>|
+
 | What is hybrid identity with Azure Active Directory? | <https://docs.microsoft.com/en-us/azure/active-directory/hybrid/whatis-hybrid-identity>  |
 | Choose the right authentication method for your Azure Active Directory hybrid identity solution | <https://docs.microsoft.com/en-us/azure/security/fundamentals/choose-ad-authn>  |
 | Azure AD Connect sync: Understand and customize synchronization |  <https://docs.microsoft.com/en-us/azure/active-directory/hybrid/how-to-connect-sync-whatis> |
@@ -523,17 +527,20 @@ We should note, that Azure SQL Database supports a BYOK option for both TDE and 
 The focal point of the engagement is a “Security Refactor and Uplift” for Contoso.    So Jessica Sams, CIO/DPO and the Jason Ming VP of IT Operations are considered the executive sponsors of the project.    Dave Stone, Lead Development Engineer has a stake in this too since ensuring app security starts from day one on design and development and extends throughout the entire SDLC to deployment in production.   
 
 **What customer business needs do you need to address with your solution and in what order?**
-We should address the near-term issue of Universal Identity Management using Microsoft Identity Platform (MIP) since all other requirements stem from that.    MIP introduces the basic concept of Identity as the primary ring of defense in terms of security.  MIP is designed as Identity as a Service (IdaaS) and serves to encapsulate the details of authentication and authorization into service-level integration thus providing that unified enterprise interface custom applications can use to adhere to the chosen security strategy as well as integrate with existing enterprise applications on a level playing field.   
-Client applications of various different configurations will be required to authenticate using MIP and then custom code can operate based on the return role members ship of the authenticate user or account credentials.   The few front-end applications that Contoso has will then be using a unified identity platform that will provide a robust security advantage, reduce complexity as well as streamline future development. 
+We should address the near-term issue of Universal Identity Management using Microsoft Identity Platform (MIP) since all other requirements stem from that.    
 
+MIP introduces the basic concept of Identity as the primary ring of defense in terms of security.  MIP is designed as Identity as a Service (IdaaS) and serves to encapsulate the details of authentication and authorization into service-level integration thus providing that unified enterprise interface custom applications can use to adhere to the chosen security strategy as well as integrate with existing enterprise applications on a level playing field.   
+
+Client applications of various different configurations will be required to authenticate using MIP and then custom code can operate based on the return role members ship of the authenticate user or account credentials.   The few front-end applications that Contoso has will then be using a unified identity platform that will provide a robust security advantage, reduce complexity as well as streamline future development. 
 
 **How would you design a Unified Identity Solution for Contoso that includes Contoso partners and customers?**
 **Goal:**  Provide an enterprise-ready solution to unify user and service account authentication, authorization, and management (provisioning).   This goal is essentially the foundational core of all the other requirements as it defines the identity management for users, LOB applications, and custom applications such as web apps, apis, service apps.  
 
 The solution provides a wide range of benefits by using Microsoft's Identity Platform (MIP) to provide a unified identity model that spans on-prem, cloud, and PaaS security requirements and brings them into a unified space using a cogent enterprise-ready platform.     
 
-**Overview of a MIP here**
-In![image info](./images/MIPOverview.png)  
+**The Microsoft Identity Platform**
+
+![image info](./images/MIPOverview.png)  
 
 The major effort is to refactor all custom application authentication and authorization workflows into the unified approach by using MIP as the primary authentication (AuthN) and authorization (AuthZ) endpoint for the entire organization.   This effort encapsulates and extends the current AuthN/AuthZ capabilities by adhering to the following architectural guidelines:
 For custom applications such as mobile, web apps, APIs, and Azure Functions use MSAL and OCID pre-built libraries to facilitate authentication workflow using one or more of the patterns Microsoft Identity Platform details as right fit for the connection pattern.     The preferred solution is to use OpenID Connect as it represents a simple authentication workflow for most application scenarios, and Microsoft directly advocates it.  
@@ -559,22 +566,35 @@ An organization’s security perimeter now extends beyond the network to include
 Provide fine-grain access control on sensitive resources based on the combined identity characteristics of the user, the requested resource, device, location, time, and other behaviors and will enforce MFA in key policy scenarios 
 
 **Use Azure AD B2B to facilitate partner login from External Partners**
-Azure AD business-to-business (B2B) functionality allows customers to grant access to applications and services integrated with their individual Azure AD tenants to guest users from other organizations. The capabilities available to guest accounts mirror, for the most part, those available to users that belong to the same Azure AD tenant. Guest accounts are provisioned via a straightforward invitation and redemption process, allowing invitees use their own credentials to authenticate. Since the partner organizations continue to rely on their own identity management solutions, additional administrative overhead is minimized. 
+Azure AD business-to-business (B2B) functionality allows customers to grant access to applications and services integrated with their individual Azure AD tenants to guest users from other organizations. The capabilities available to guest accounts mirror, for the most part, those available to users that belong to the same Azure AD tenant. Guest accounts are provisioned via a straightforward invitation and redemption process, allowing invitees use their own credentials to authenticate. Since the partner organizations continue to rely on their own identity management solutions, additional administrative overhead is minimized.  
+
 While the partner guest accounts are stored in the same Azure AD tenant as the user accounts of members of the organizations that provide access to its resources, they are easy to distinguish since their userType attribute is set to Guest. However, the process of granting access to cloud-based apps is the same. In addition, you have the option of granting guest accounts access to on-premises apps. Details depend on the authentication capabilities of the apps. 
+
 For SAML support, if on-premises apps use SAML-based authentication they can be available Azure AD B2B guests directly from the Azure portal by adding them to Azure AD based on the non-gallery application template and then using Azure AD Application Proxy to publish them, with Azure AD configured as the authentication source, however most of Contoso’s apps are cloud-based anyway so guests should be able to access them via membership. 
 
-**Use Azure AD B2C to facilitate partner login from External Partners**
+**Use Azure AD B2C to facilitate customer login from External Customers**
+This path is used where the Contoso customer opts to create a formal account within Contoso to interact with some of the deeper experiences provided within the customer workflow instead of just purchasing items via the ecommerce purchase path.  
+
+The deeper customer experience contains features such as:
+
+- Saving of payment methods, tracked order status and history
+- Products and services technical support
+- Access to exclusive blogged formal training and informal "How To" content 
+
 Azure Active Directory B2C provides business-to-customer identity as a service. Customers can use their preferred social, enterprise, or local account identities to authenticate in order to access applications and APIs offered by your organization. B2C requires an Azure AD tenant separate from the one used by organization's users and applications (and, consequently, different from the one that is used in B2B scenarios). In order to make your applications and APIs available via an Azure AD B2C tenant, you need to register them with that tenant.
+
 **Use Role-Based Access Control (RBAC)** 
 This strategy provides simplified, and systematic assignment of permissions to roles instead of individual accounts and service principals.   
 One thing to note, that Azure, RBAC is an additive model, therefore overlapping role assignments will result in effective permissions being the union of one or more roles.
 
 **Reduce membership and exposure of privileged accounts via role membership**   
-Securing privileged access using Principle of Least Privilege is the critical first step that security teams need to apply.   
-With Contoso, this is easier since they have already defined basic roles based on the SOD study.   
+Securing privileged access using Principle of Least Privilege is the critical first step that security teams need to apply.   With Contoso, this is easier since they have already defined basic roles based on the SOD study.   
+
 The **Principle of Least Privilege (POLP)** is the concept detailing any user, process, or application should have only the minimum level of permissions necessary to perform key functions.
 
-*As an example:*   A developer working on a small project for sales does not need access to HR records.   Conversely, a user account used for read only access to a database does not need admin rights, or even write access to the same resource.   Planning account and role privilege using this concept tends to drastically reduce security risks throughout the enterprise to include custom application vulnerabilities. 
+*As an example:*   A developer working on a small project for sales does not need access to HR records.   Conversely, a user account used for read only access to a database does not need admin rights, or even write access to the same resource.  
+
+ Planning account and role privilege using this concept tends to drastically reduce security risks throughout the enterprise to include custom application vulnerabilities. 
 Organizations that seek to minimize the number of people who have access to secure information or resources thereby reduces the probability of malicious access.
 
 **Enable AAD Identity Protection** 
@@ -585,6 +605,31 @@ AD provides seamless SSO across participating applications, and also provides bu
 
 Once this portion of the solution is complete, the organization can set the stage for ensuring that all custom applications integrate with **Microsoft Identity Platform (MIP)** to authenticate and authorize identities within the custom application workflow. Some refactoring will be required. 
 
+- **What are some methods to effectively migrate users for both the External Partners and Customers from existing user stores into the new Unified Identity Solution?**
+
+**Goal:**  Provide a method for migrating existing users from the current self-hosted applicaiton storage to Microsoft Managed Identity managed B2C and B2B tenants.  
+
+Microsoft has provided a two-phase approach that works with custom code (modifications to existing web applications) and represents an essentially invisible experience to the user since all of the migration tasks occur within the Contoso web applicaion workflow. 
+
+This migration flow requires a primary bulk migration of existing user accounts, but then uses a custom policy to query a  secondary REST API endpoint to set each users' password on next user sign-in.  This flow can be expressed as two distinct stages:
+
+**Stage 1: Bulk import**
+
+- A simple migration application process reads existing user accounts from the old identity provider, in this case, for the Contoso Preferred Customer Accounts the "identity provider" is really a custom membership store in Contoso's in Azure SQL Database that the customer web application was connected to.   
+
+- For each of these custom account records, the migration application creates corresponding user accounts in your Azure AD B2C directory by using MS Graph, but does not set passwords.   Each migrated account gets a custom extention attribute which is a boolean migration flag set to TRUE, signifying that this account must complete migration.   
+
+**State 2: Set credentials**
+Stage 2 begins once the bulk migration of the accounts is complete and here, engineers create a custom policy and code a REST API endpoint to execute the following when a user signs in:
+
+1. Read the Azure AD B2C user account corresponding to the email address entered and inspect the account looking for the state of the migration flag.
+
+2. IF the value of the extention attribute is:
+
+- **TRUE** - call the REST API to validate the password the user just entered against the legacy identity provider, and if the validation returns false return a friendly error to the user, else if correct, write the entered password to the Azure AD B2C account and change the boolean extension attribute to FALSE.
+
+- **FALSE** - Continue the sign-in process as normal using Azure AD B2C as the authoritative identity provider.   
+  
 **How would you ensure data is encryption across the full stack for Contoso?**
 **Goal:**  Ensure all data within the organization is encrypted at all times and reduce complexity of application encryption by using pre-built middleware to encrypt/decrypt on the fly. 
 
@@ -599,14 +644,25 @@ Implementation of Always Encrypted for key data within the database will ensure 
 
 **Use the default Azure Master Key Management for TDE/AE**
 For a smaller company like Contoso it is more advantageous to let Azure manage CMKs for both TDE and AE.   This is the default configuration where Azure manages the key placement, and rotation in accordance with Microsoft Security Policy. 
+
 **Alternate:**   For both TDE and AE, enterprises can opt for the BYOK scenario.  And in this scenario, the CMK is generated by the user using hardware or software generation means and these keys are stored in a key store like Azure Key Vault.   In this scenario, the organization is responsible for key management tasks like key provisioning and rotation.   BYOK is typically reserved for highly regulated environments where key management and certificate management is part of the chain of custody for secure data and must be audited by an auditing authority. 
+
+- **How would you design a solution where credential master keys (CMK) for data encrption, were managed by a regulated team such as in BYOK scenarios?** 
+**Goal:**  Provide a secure solution for Self-managed credential master keys using Azure including describing key rotation and replacement.  
+
+**BYOK**
+
+
+**Key Rotation**
+
+
 
 **How would you control access to data, cloud resources, and LOB applications within the organization as well as reducing authorization management overhead?**
 **Goal:** Use RBAC principles to design a tight integration between identity and assigned roles defined in the organization and data and cloud resources and LOB applications users and services can access.  
 
-The major driver for controlling access to data, and resources within the organization is the use of RBAC wherever possible within the workflows of custom applications.    
-Assigning authorized permissions to Roles rather than individual users were possible, reduces management overhead by design.   
-LOB COTS applications such as Dynamics will already use RBAC to a high level, so most of the authorization management further reduced in scope to the definition of a small number of custom roles that mostly facilitate custom applications within the organization. 
+The major driver for controlling access to data, and resources within the organization is the use of RBAC wherever possible within the workflows of custom applications. Assigning authorized permissions to Roles rather than individual users were possible, reduces management overhead by design.   
+
+LOB applications such as Dynamics will already use RBAC to a high level, so most of the authorization management further reduced in scope to the definition of a small number of custom roles that mostly facilitate custom applications within the organization. 
 
 **For data within Azure SQL Database**
 Apply object-level Permissions to database objects based on Roles   At the DB level, every object is considered a securable.   Permissions can be assigned to a principal based on built-in or custom roles to ensure use of RBAC permissions on key objects (Tables, Views, Stored Procedures, Functions).  The result ensures that only trusted role members can have access to secured database objects.   The use of application roles simplifies secure application access and allows for discreet audit of role participant activity as well.   The addition of custom user and application roles are based on roles defined in Contoso’s Infosec Policy.  
@@ -629,6 +685,43 @@ Use built-in Azure Roles as these will typically suffice for most cloud resource
 **NOTE**
 Both RLS and DDM are vulnerable to certain side-channel attacks so advise the study group to be sure to research these. 
 
+- **How would you ensure robust application security design across all stages of development from POC to deployment in Production?**
+
+![image info](./images/DirectAppConnectivity.png)
+
+
+**Use a Declarative, Repeatable Deployment Tool-Chain** 
+Secure applications are deployed using a verified declarative and repeatable deployment pipeline via Azure DevOps.  This is the only source for secure app deployment through ALL STAGES of the SDLC.   “One-click” desktop deployments, or “drag and drop” deployments are not allowed in any stage of development once an application leaves POC or local development status.   Any approved application is developed from an official repo that is configured to a declared build pipeline and deployed using that same pipeline to approved environments.   Deployments use a declared cadence with the exception of hotfixes which are few and far between.   
+
+**Deploy using a declarative Release Process**
+The release process for Contoso, involves a pipeline executed release pattern using trunk-based deployment into a declared blue-green production environment.   
+
+All code changes for applications including major and minor releases, scheduled patches, and hotfixes are all released using this process.    
+
+The ultimate goal here is to provide a formal, secure, and repeatable framework with conditional visibility to prevent injection of accidental vulnerabilities as well as reducing opportunities for malicious releases.   
+
+A major new feature might be released using a control group (beta group, or canary group), and can be configured to use feature flags, but for the most part, the process provides predictable long-term support for custom applications with a dedicated workflow so releases are less volatile than a greenfield feature set might be. 
+
+**For Server or Serverless Apps**
+
+![image info](./images/ServerAppDeployment.png)
+
+
+
+This same concept works for container apps as well as direct app deployment.   For container apps you have added container management tooling and task directly to a pipeline definition. 
+
+**For Container Apps**
+
+![image info](./images/ContainerAppDeployment.png)
+
+
+Such integration works with Azure Container Registry and/or 3rd party managers, like Docker, Helm, or Rancher, but ultimately the entire process is still deploying through the dedicated build and deployment tooling.   The deploy path is still a declarative pipeline where deployment execution can be managed by role, as in the diagram below. 
+
+
+- **What methods can be used to abstract application secrets away from application configuration during development and deployment?**
+
+For this method you 
+
 **What refactoring is required for custom applications to use the unified identity strategy?**
 Any API secured using  Microsoft Identity Platform(MIP) is first registered with MIP which essentially registeres the Application with AAD.  After registratio the application will request 
  a valid identity and access token during the authentication request.  The access tokens are in JWT format.   
@@ -638,22 +731,29 @@ using a client library for audience, issuer, as well as time window (nbf, and ex
 the token payload must be immutable so relying on OID or SUB is preferred mostly because UPN and email can change within the organization AAD tree.  
 
 **MIPS User Authentication Example**
-In![image info](./images/MIPSampleUserAuthenticationFlow.png)  
 
-**On-Behalf-Of (OBO) Scenarios**
+![image info](./images/MIPSampleUserAuthenticationFlow.png)  
+
+**On-Behalf-Of (OBO) Authentication**
+
+![image info](./images/MIPSampleOBOAuthenticationFlow.png)  
+
 In addition, MIP supports OAuth On-Behalf-Of (OBO) Scenarios where a service authenticates with another service on behalf of the user. 
-In![image info](./images/MIPSampleOBOAuthenticationFlow.png)  
 
-**Example of a “Identity Token” here **
-In![image info](./images/ExampleIdentityToken.png)  
+This is an Example of an **“Identity Token”**
 
-**Example of a “Access Token” here **
-In![image info](./images/ExampleAccessToken.png)  
+![image info](./images/ExampleIdentityToken.png)  
 
-**Additive App and User Permissions and Consent
+This is an example of an **“Access Token”**
+
+![image info](./images/ExampleAccessToken.png)  
+
+**Additive App and User Permissions and Consent**
 Application Permissions (consider service or daemon apps) use a slightly different flow for access tokens where they authenticate as “themselves”, not on behalf of the user by sending credentials.   These applications use a Credential Flow in which claims are detailed in Roles instead of scopes like you will see with user access tokens.  Apps are allocated within Application Roles so once they authenticate with an api and get an access token the token contains roles not scopes as it would with a user.    So it is the application role that is validated in the workflow versus scope for the user.   Application permissions are created on the same MIP registration workflow used to register the application.   
+
 The permissions in this case are additive just like roles:
-In![image info](./images/EffectivePermssions.png)  
+
+![image info](./images/EffectivePermssions.png)  
 
 **Who should you present this solution to?**
 The target group should be:  
