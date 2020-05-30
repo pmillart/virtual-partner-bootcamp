@@ -1,0 +1,4 @@
+You have recently successfully engaged with Contoso Coffee Ltd., a popular supplier of goods for baristas and showcased them a proof-of-concept solution which would both migrate them to the cloud and modernize their backend.
+Later, you have further improved the application's PoC with several security-related measurements, so that now you're ready to take the application to production.
+However, '*friends don't let friends right-click, publish!*' To ensure Contoso Coffee is ready for production, you are asked to set-up their continuous integration and continuous story.
+Their CTO, John Wash, asked you to prepare their CI/CD pipelines using GitHub Actions.

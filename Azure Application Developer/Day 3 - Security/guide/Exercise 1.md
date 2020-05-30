@@ -6,7 +6,7 @@ Nonetheless, before getting started it's of paramount importance to ensure prope
 
 ## Accessing Microsoft Azure
 
-Launch yout favourite browser from the virtual machine desktop and navigate to the URL below. Your Azure Credentials are available by clicking the Cloud Icon at the top of the Lab Player.
+Launch your favourite browser from the virtual machine desktop and navigate to the URL below. Your Azure Credentials are available by clicking the Cloud Icon at the top of the Lab Player.
 
 ```sh
 https://portal.azure.com

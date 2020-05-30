@@ -456,12 +456,13 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
     Taints can be applied to a node pool using the `--node-taints` parameter of the `az aks nodepool add` command. For example:
 
     ```sh
-    az aks nodepool add --node-taints aks-iopspool-28993262-vmss000000 sku=iops:Schedule
+    az aks nodepool add \
+      -g ...
+      -n ...
+      --node-taints iopspool sku=iops:NoSchedule
     ```
 
-    **Note:** The `--node-taints` parameter is adding a taint to a node pool based on the clusters internal name for the pool - not the friendly name you used when you created the node pool originally. To find this name, you need to authenticate to the cluster and run `kubectl get nodes`.
-
-    Creating pods and specifying a toleration of `sku=iops:Schedule` will allow the pod to be scheduled on the specified node pool. For example:
+    Creating pods and specifying a toleration of `sku=iops:NoSchedule` will allow the pod to be scheduled on the specified node pool. For example:
 
     ```yaml
     apiVersion: v1
@@ -470,7 +471,7 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
       name: iopspod
     spec:
       containers:
-      - image: nginx:1.15.9
+      - image: myImage
         name: iopspod
         resources:
           requests:
@@ -483,7 +484,7 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
       - key: "sku"
         operator: "Equal"
         value: "iops"
-        effect: "schedule"
+        effect: "NoSchedule"
     ```
 
 2. **Design:** What IP addressing scheme would you recommend to Contoso Commerce to best balance resource usage for nodes and pods?
@@ -598,7 +599,7 @@ Tables reconvene with the larger group to hear the facilitator/SME share the pre
 
     **Solution:** As new versions of Ubuntu are released in a preview state, new clusters can be provisioned in Azure which target the new OS and testing can be performed against them.
 
-    It is also possible to test new operating systems before they are avaialble in the formal AKS service by leverage the underlying deployment and provisioning engine that Microsoft uses for AKS - [AKS Engine](https://github.com/Azure/aks-engine):
+    It is also possible to test new operating systems before they are available in the formal AKS service by leverage the underlying deployment and provisioning engine that Microsoft uses for AKS - [AKS Engine](https://github.com/Azure/aks-engine):
 
     > *AKS Engine provides convenient tooling to quickly bootstrap Kubernetes clusters on Azure. By leveraging ARM (Azure Resource Manager), AKS Engine helps you create, destroy and maintain clusters provisioned with basic IaaS resources in Azure. AKS Engine is also the library used by AKS for performing these operations to provide managed service implementations.*
 
