@@ -779,12 +779,36 @@ This particular subject is rather large in scope with many driving conditions an
 
 **Authentication and Authorization**
 
-Ensuring generally secure applications is a mix of policy, procedure, and configuration.      Here we cover the basic process coupled with the actions teams can take to ensure applications are deployed in a secure fashion using MIP.   We should note that application workflow should use RBAC checks that test for access on request within a unified middleware component throughout the application workflow.   Using Microsoft Identity Platform will streamline authentication and authorization which also simplifies app integration as well as providing more robust connectivity options. 
+Ensuring generally secure applications is a mix of policy, procedure, and configuration and this means that operator teams should invest time into detailed research in what Microsoft has to offer.  Here we cover the basic process coupled with the general actions teams can take to ensure applications are deployed in a secure fashion using MIP.   Using MIP streamlines authentication and authorization which also simplifies app integration as well as providing more robust connectivity options. 
+
+Applications that integrate with MIP should use workflow RBAC checks that test for access on request within a unified middleware component throughout the application workflow.   
+
+ Microsoft identity platform implements the OAuth 2.0 authorization protocol. OAuth 2.0 is a method through which a third-party app can access web-hosted resources on behalf of a user. Any web-hosted resource that integrates with the Microsoft identity platform has a resource identifier, or Application ID URI. 
+ 
+ *For instance*, consider some of Microsoft's well-known web-hosted Application ID URIs:
+
+- Microsoft Graph: https://graph.microsoft.com
+- Office 365 Mail API: https://outlook.office.com
+- Azure Key Vault: https://vault.azure.net
 
 ![image info](./images/DirectAppConnectivity.png)
 
+After integration with Microsoft Identity Platform, developers can refactor to bake the concept of RBAC checks into the  application workflow through role checking within the workflow.   Essentially, actors who are members of roles with assigned permissions, drive the action, and based on RBAC checks, the workflow enables the action if the user roles and conditions are approved.   
 
-After integration with Microsoft Identity Platform, developers can refactor to bake the concept of RBAC checks into the  application workflow through role checking within the workflow. Essentially, actors who are members of roles with assigned permissions, drive the action, and based on RBAC checks, the workflow enables the action if the user roles and conditions are approved.   
+But what are these permissions?  From OAuth2.0 the concept of permissions are implemented as *scopes, or permissions*, where a permission is represented in MIP as an application specific string value.  
+
+To illustrate this, lets use an example from Microsoft documentation using Microsoft Graph:, the string value for each permission is:
+- Read a user's calendar by using *Calendars.Read*
+- Write to a user's calendar by using *Calendars.ReadWrite*
+- Send mail as a user using by *Mail.Send*
+ 
+An app most commonly requests these permissions by specifying the scopes in requests to the Microsoft identity platform authorize endpoint, but for certain elevated permissions, this might require administrative user interaction. 
+
+MIP provides a unified platform for authentication and authorization and in addition, allows developer and operator security teams to engage in finer-grained access control such as: 
+- restrict access to a resource using combinations of roles and permissions creating an effective permission set for execution
+- restrict an app to certain actions via scope/permissions 
+- restrict access to certain workflows any time after authorization  
+- control end-user consent using workflow and integration with AD consent capabilities
 
 **Robust Deployment using a Declarative Deployment Tool-Chain** 
 
