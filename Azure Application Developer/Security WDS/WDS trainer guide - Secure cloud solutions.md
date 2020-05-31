@@ -427,21 +427,23 @@ Locking down a Secure Cloud Application Strategy is the primary concern right no
 |----------|:-------------:|
 | **Description** | **Links** |
 | Azure SQL Database TDE (BYOK)         | <https://docs.microsoft.com/en-us/azure/azure-sql/database/transparent-data-encryption-byok-configure> |
-|TDE BYOK Process Overview |<https://docs.microsoft.com/en-us/azure/azure-sql/database/transparent-data-encryption-byok-overview>|
+| TDE BYOK Process Overview |<https://docs.microsoft.com/en-us/azure/azure-sql/database/transparent-data-encryption-byok-overview>|
 | Azure SQL Database Always Encrypted   | <https://docs.microsoft.com/en-us/azure/azure-sql/database/always-encrypted-certificate-store-configure> |
 | Azure SQL Database AE Colum Master Key Overview |<https://docs.microsoft.com/en-us/sql/relational-databases/security/encryption/overview-of-key-management-for-always-encrypted>|
 | Azure SQL Database AE Column Master Key Management| <https://docs.microsoft.com/en-us/sql/relational-databases/security/encryption/create-and-store-column-master-keys-always-encrypted> |
 | Azure SQL Database Row Level Security | https://azure.microsoft.com/en-us/resources/videos/row-level-security-in-azure-sql-database/ |
 | Azure Key Vault Developer's Guide     | <https://azure.microsoft.com/documentation/articles/key-vault-developers-guide/>|
 | About Keys and Secrets                | <https://msdn.microsoft.com/library/dn903623.aspx> |
-|Quickstart: Azure Key Vault client library for .NET(SDK v4)|<https://docs.microsoft.com/en-us/azure/key-vault/secrets/quick-create-net#setting-up>|
-|Tutorial: Use a managed identity to connect Key Vault to an Azure Web App with .NET|<https://docs.microsoft.com/en-us/azure/key-vault/general/tutorial-net-create-vault-azure-web-app>|
+| Quickstart: Azure Key Vault client library for .NET(SDK v4)|<https://docs.microsoft.com/en-us/azure/key-vault/secrets/quick-create-net#setting-up>|
+| Tutorial: Use a managed identity to connect Key Vault to an Azure Web App with .NET|<https://docs.microsoft.com/en-us/azure/key-vault/general/tutorial-net-create-vault-azure-web-app>|
 | Azure API Management Overview         | <https://docs.microsoft.com/azure/api-management/api-management-key-concepts> |
 | Working with Azure Functions Proxies  | <https://docs.microsoft.com/azure/azure-functions/functions-proxies> |
 | Git Trunk-based Development|https://trunkbaseddevelopment.com/|
 | Register an Application with MID V2   | <https://docs.microsoft.com/en-us/graph/auth-register-app-v2>|
 | Microsoft Identity Platform and OpenID Connect|<https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc>|
 | Azure MIP-MSAL Authentication Flows       | <https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-authentication-flows>|
+| MIP Permissions and Consent |<https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent>|
+| Microsoft Identity Platform Best Practice Checklist|<https://docs.microsoft.com/en-us/azure/active-directory/develop/identity-platform-integration-checklist>|
 | What is Azure Active Directory B2B? | <https://docs.microsoft.com/en-us/azure/active-directory/b2b/>  |
 | Azure Active Directory B2B documentation | <https://docs.microsoft.com/en-us/azure/active-directory/b2b/>  |
 | Azure Active Directory B2C Technical Overview|<https://docs.microsoft.com/en-us/azure/active-directory-b2c/technical-overview>|
@@ -786,7 +788,11 @@ After integration with Microsoft Identity Platform, developers can refactor to b
 
 **Robust Deployment using a Declarative Deployment Tool-Chain** 
 
-Secure applications are deployed using a verified declarative and repeatable deployment pipeline via Azure DevOps.  This is the only source for secure app deployment through ALL STAGES of the SDLC.   “One-click” desktop deployments, or “drag and drop” deployments are not allowed in any stage of development once an application leaves POC or local development status.   Any approved application is developed from an official repo that is configured to a declared build pipeline and deployed using that same pipeline to approved environments.   Deployments use a declared cadence with the exception of hotfixes which are few and far between.   
+Secure applications are deployed using a verified declarative and repeatable deployment pipeline via Azure DevOps.  This is the only source for secure app deployment through ALL STAGES of the SDLC.   “One-click”, or “drag and drop” desktop deployments are NOT allowed in any stage of development once an application leaves POC or local development status.   
+
+Any approved application is developed from an official repo that is configured to a declared build pipeline and deployed using that same pipeline to approved environments.   
+
+Releases use a declared cadence with the exception of hotfixes which are few and far between.   
 
 The release process for Contoso, involves a pipeline executed release pattern using trunk-based deployment into a declared blue-green production environment.   
 
@@ -818,9 +824,11 @@ All web-based applications use secure protocol configurations regardless of whet
 
 **What methods can be used to abstract application secrets away from application configuration during development and deployment?**
 
-Part of Contoso's requirements is to encapsulate sensitive configuration data away from application configuration.  
+Part of Contoso's requirements is to encapsulate sensitive configuration data away from application configuration.  AKV meets the requirement for FIPS 140-2 Level 2 validated Hardware Security Modules (HSM's) when storing configuration data so it is exceptionally secure and is a right fit for Contoso's needs. 
 
-This can be accomplished by storing sensitive configuration information in Azure Key Vault and registering the application with Azure AD.  After registration, the application can use its client id and authentication key to connect to Azure Key Vault (AKV) using the Microsoft Managed Identity.   
+Application integration with AKV can be accomplished by first adding sensitive configuration information in AKV and registering the application with Azure AD.  After registration, the application can use its client id and authentication key to connect to Azure Key Vault (AKV) using the Microsoft Managed Identity.   Applications must be refactored to use the **Microsoft Azure Key Vault Configuration Provider** package to load app secrets as configuration values during startup. 
+
+The configuration Provider is in this package: **Microsoft.Extensions.Configuration.AzureKeyVault**   During refactoring development teams will also remove any code-level secrets from application configuration and moving forward, Contoso development teams can use this method for controlling access to sensitive configuration data.  
 
 For context, consider this image from Microsoft: 
 
@@ -879,8 +887,26 @@ This is an example of an **“Access Token”**
 
 ![image info](./images/ExampleAccessToken.png)  
 
-**Additive App and User Permissions and Consent**
-Application Permissions (consider service or daemon apps) use a slightly different flow for access tokens where they authenticate as “themselves”, not on behalf of the user by sending credentials.   These applications use a Credential Flow in which claims are detailed in Roles instead of scopes like you will see with user access tokens.  Apps are allocated within Application Roles so once they authenticate with an api and get an access token the token contains roles not scopes as it would with a user.    So it is the application role that is validated in the workflow versus scope for the user.   Application permissions are created on the same MIP registration workflow used to register the application.   
+**Additive App and User Permissions**
+Applications that integrate with Microsoft Identity Platform follow an authorization model enabling administrators and users access control over how resources and data. 
+
+Application Permissions for apps and users result in a union.     Microsoft Identity Platform can deliver authorization based on this union.  
+
+Application Permissions for service of daemon apps use a slightly different flow for access tokens where they authenticate as “themselves”, not on behalf of the user by sending credentials. These applications use a Credential Flow in which each app has an individual credential it uses to authenticate.    
+
+Apps are allocated within Application Roles so once they authenticate with an api and get an access token the token contains roles not scopes as it would with a user.    So it is the application role that is validated in the workflow versus scope for the user.   Application permissions are created on the same MIP registration workflow used to register the application.   
+
+MIP supports two key types of permissions: 
+- delegated Permissions
+- Application Permissions
+
+**Delegated Permissions**
+This permission type is utilized by apps that have a signed-in user present. In this permission context, either the user consents to grant the requested permissions to the app, thus the app is "delegated permission to act" as the signed-in user when accessing resources and data.  
+
+**Application Permissions**
+This permission type is utilized by apps that run without a signed-in user present, such as background services or daemons.  In this permisison context, permissions can only be granted by an administrator.
+
+By defining permission types, operator teams now have fine-grained access control API workflow and data.   This means any integrated app can request permissions to execute workflow or access data.   Using this construct, apps can request only the specific permissions required to execute their function.   Nothing more, nothing less.   Further, the code becomes more declarative, as developers can literally read what permissions are being requested and checked within the actual code line.   On the management side, administrators can know exactly what access the application is intended to have based on what is seen in app registration.  
 
 The permissions in this case are additive just like roles:
 

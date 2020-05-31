@@ -33,7 +33,7 @@ Microsoft and the trademarks listed at <https://www.microsoft.com/legal/intellec
     - [Customer Requirements](#customer-requirements)
     - [Customer Objections](#customer-objections)
     - [Key Design Considerations](#key-design-considerations)
-    - [Infographic for common scenarios](#infographic-for-common-scenarios)
+    - [Contoso Current High-level Architecture](#contoso-current-high-level-architecture)
   - [Step 2: Design a Solution](#step-2-design-a-solution)
   - [Step 3: Present the Solution](#step-3-present-the-solution)
   - [Wrap-up](#wrap-up)
@@ -314,6 +314,8 @@ Locking down a Secure Cloud Application Strategy is the primary concern right no
 | Register an Application with MID V2   | <https://docs.microsoft.com/en-us/graph/auth-register-app-v2>|
 | Microsoft Identity Platform and OpenID Connect|<https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc>|
 | Azure MIP-MSAL Authentication Flows       | <https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-authentication-flows>|
+| MIP Permissions and Consent |<https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent>|
+| Microsoft Identity Platform Best Practice Checklist|<https://docs.microsoft.com/en-us/azure/active-directory/develop/identity-platform-integration-checklist>|
 | What is Azure Active Directory B2B? | <https://docs.microsoft.com/en-us/azure/active-directory/b2b/>  |
 | Azure Active Directory B2B documentation | <https://docs.microsoft.com/en-us/azure/active-directory/b2b/>  |
 | Azure Active Directory B2C Technical Overview|<https://docs.microsoft.com/en-us/azure/active-directory-b2c/technical-overview>|
